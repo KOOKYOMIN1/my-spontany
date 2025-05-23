@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function Plan() {
   const [departure, setDeparture] = useState('')
@@ -6,12 +7,17 @@ function Plan() {
   const [mood, setMood] = useState('')
   const [isWithCompanion, setIsWithCompanion] = useState(false)
 
+  const navigate = useNavigate()
+
   const handleSubmit = () => {
-    console.log('출발지:', departure)
-    console.log('예산:', budget)
-    console.log('감정:', mood)
-    console.log('동행:', isWithCompanion)
-    // 여기에 나중에 "/result"로 이동 로직 넣으면 돼
+    const params = new URLSearchParams({
+      departure,
+      budget,
+      mood,
+      companion: isWithCompanion,
+    })
+
+    navigate(`/result?${params.toString()}`)
   }
 
   return (
@@ -32,7 +38,7 @@ function Plan() {
       <input
         type="text"
         placeholder="예: 2025-06-01 ~ 06-04"
-        // 나중에 useState로 관리할 수 있음
+        // (선택 사항) 나중에 useState로 관리 가능
       />
 
       <br /><br />
