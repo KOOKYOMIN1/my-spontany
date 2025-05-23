@@ -1,6 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Plan from './pages/Plan'
-import Result from './pages/Result'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Plan from './pages/Plan';
+import Result from './pages/Result';
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
         <Route path="/result" element={<Result />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
