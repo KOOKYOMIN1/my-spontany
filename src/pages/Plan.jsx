@@ -1,19 +1,20 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LoginButton from '../components/LoginButton';
 
 function Plan() {
-  const [departure, setDeparture] = useState('')
-  const [budget, setBudget] = useState('')
-  const [mood, setMood] = useState('')
-  const [isWithCompanion, setIsWithCompanion] = useState(false)
+  const [departure, setDeparture] = useState('');
+  const [budget, setBudget] = useState('');
+  const [mood, setMood] = useState('');
+  const [isWithCompanion, setIsWithCompanion] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const emotions = [
     { label: '기분전환', emoji: '😐' },
     { label: '힐링', emoji: '😴' },
     { label: '설렘', emoji: '💘' },
-  ]
+  ];
 
   const handleSubmit = () => {
     const params = new URLSearchParams({
@@ -21,14 +22,15 @@ function Plan() {
       budget,
       mood,
       companion: isWithCompanion,
-    })
-
-    navigate(`/result?${params.toString()}`)
-  }
+    });
+    navigate(`/result?${params.toString()}`);
+  };
 
   return (
     <div className="p-8 max-w-md mx-auto">
       <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">Spontany 여행 계획하기</h1>
+
+      <LoginButton />
 
       <label className="block mb-2">출발지:</label>
       <input
