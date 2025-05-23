@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginButton from '../components/LoginButton';
+import DestinationPhotoViewer from '../components/DestinationPhotoViewer'; // 🔥 여행지 사진 컴포넌트 추가
 
 function Plan() {
   const [departure, setDeparture] = useState('');
@@ -90,8 +91,12 @@ function Plan() {
       >
         ✨ 즉흥 여행 생성하기
       </button>
+
+      <div className="mt-10">
+        <DestinationPhotoViewer /> {/* 🔥 여행지 사진 보여주는 컴포넌트 */}
+      </div>
     </div>
-  )
+  );
 }
 
-export default Plan
+export default Plan;
