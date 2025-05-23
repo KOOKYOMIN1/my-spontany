@@ -1,12 +1,15 @@
-# React + Vite
+# 🧭 Spontany - 즉흥 여행 생성기
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+당신의 기분, 예산, 출발지에 따라  
+지금 떠날 수 있는 여행지를 추천해주는 웹 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## ✨ 기술 스택
+- React
+- Vite
+- TailwindCSS
+- React Router DOM
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠 주요 기능
+- 감정 기반 여행지 추천
+- 동행 여부 설정
+- 즉흥성 기반 여행 플래너
