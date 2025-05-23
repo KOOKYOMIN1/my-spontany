@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
+import LoginButton from "./components/LoginButton";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -43,7 +44,10 @@ function App() {
           </button>
         </>
       ) : (
-        <p>로그인 해주세요</p>
+        <>
+          <p className="mb-4">로그인 해주세요</p>
+          <LoginButton />
+        </>
       )}
     </div>
   );
