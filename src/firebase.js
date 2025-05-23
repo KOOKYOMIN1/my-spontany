@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDLJE0dUXKFTQZXLwPZ_Bd0NqYWmwQYIQk",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "my-spontany.firebaseapp.com",
   projectId: "my-spontany",
   storageBucket: "my-spontany.appspot.com",
