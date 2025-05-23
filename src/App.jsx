@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
+import { Routes, Route } from "react-router-dom";
+
 import LoginButton from "./components/LoginButton";
-import Plan from "./pages/Plan"; // Plan.jsx 위치에 맞게 경로 수정
+import Plan from "./pages/Plan";
+import Result from "./pages/Result";
 
 function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        console.log("✅ 로그인 유지됨:", firebaseUser.email);
-      } else {
-        setUser(null);
-        console.log("🚪 로그아웃 상태");
-      }
+      setUser(firebaseUser || null);
+      console.log(firebaseUser ? `✅ 로그인 유지됨: ${firebaseUser.email}` : "🚪 로그아웃 상태");
     });
 
     return () => unsubscribe();
@@ -32,28 +30,23 @@ function App() {
 
   return (
     <div className="App text-center p-8">
-      <h1 className="text-3xl font-bold text-blue-600 mb-4 flex justify-center items-center gap-2">
-        Spontany ✈️
-      </h1>
+      <h1 className="text-3xl font-bold text-blue-600 mb-6">Spontany ✈️</h1>
 
       {user ? (
         <>
-          <p className="mb-2">
-            안녕하세요, <strong>{user.displayName}</strong>님
-          </p>
-
-          {/* 🔥 여행 생성 폼 보여주기 */}
-          <div className="mt-6">
-            <Plan />
-          </div>
-
-          {/* 로그아웃 버튼 */}
+          <p className="mb-4">안녕하세요, <strong>{user.displayName}</strong>님</p>
           <button
             onClick={handleLogout}
-            className="mt-6 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+            className="mb-6 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
           >
             로그아웃
           </button>
+
+          {/* 🔀 라우팅 영역 */}
+          <Routes>
+            <Route path="/" element={<Plan />} />
+            <Route path="/result" element={<Result />} />
+          </Routes>
         </>
       ) : (
         <>
