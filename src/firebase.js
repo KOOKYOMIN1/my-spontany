@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD... (생략)",
+  apiKey: "AIzaSyDLJE0dUXKFTQZXLwPZ_Bd0NqYWmwQYIQk",
   authDomain: "my-spontany.firebaseapp.com",
   projectId: "my-spontany",
   storageBucket: "my-spontany.appspot.com",
