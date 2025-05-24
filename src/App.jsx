@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom"; // ⬅️ Link 추가
 
 import LoginButton from "./components/LoginButton";
 import Plan from "./pages/Plan";
 import Result from "./pages/Result";
+import History from "./pages/History"; // ✅ 히스토리 페이지 import
 
 function App() {
   const [user, setUser] = useState(null);
@@ -37,6 +38,17 @@ function App() {
           <p className="mb-4">
             안녕하세요, <strong>{user.displayName}</strong>님
           </p>
+
+          {/* ✅ 히스토리 이동 링크 */}
+          <div className="mb-4">
+            <Link
+              to="/history"
+              className="text-indigo-500 hover:underline text-sm"
+            >
+              나의 여행 히스토리 보기
+            </Link>
+          </div>
+
           <button
             onClick={handleLogout}
             className="mb-6 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
@@ -44,15 +56,14 @@ function App() {
             로그아웃
           </button>
 
-          {/* 🔀 라우팅 영역 */}
           <Routes>
             <Route path="/" element={<Plan />} />
             <Route path="/result" element={<Result />} />
+            <Route path="/history" element={<History />} /> {/* ✅ 추가 */}
           </Routes>
         </>
       ) : (
         <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-6">
-          {/* ✅ 이미지 크기 강제 제한 */}
           <div
             style={{
               width: "100%",
