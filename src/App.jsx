@@ -34,7 +34,9 @@ function App() {
 
       {user ? (
         <>
-          <p className="mb-4">안녕하세요, <strong>{user.displayName}</strong>님</p>
+          <p className="mb-4">
+            안녕하세요, <strong>{user.displayName}</strong>님
+          </p>
           <button
             onClick={handleLogout}
             className="mb-6 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
