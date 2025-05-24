@@ -51,20 +51,20 @@ function App() {
           </Routes>
         </>
       ) : (
-        <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-6">
-          <div className="overflow-hidden rounded-2xl mb-4">
-            <img
-              src="https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg"
-              alt="여행 감성"
-              className="w-full h-[160px] object-cover"
-            />
-          </div>
-          <h1 className="text-2xl font-bold text-blue-500 mb-2">Spontany ✈️</h1>
-          <p className="text-gray-700 mb-4">
-            지금 당신의 감정에 맞춘 여행을 추천해드립니다 ✨
-          </p>
-          <LoginButton />
-        </div>
+<div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-6">
+  <div className="w-full h-[160px] overflow-hidden rounded-2xl mb-4">
+    <img
+      src="https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg"
+      alt="여행 감성"
+      className="w-full h-full object-cover"
+    />
+  </div>
+  <h1 className="text-2xl font-bold text-blue-500 mb-2">Spontany ✈️</h1>
+  <p className="text-gray-700 mb-4">
+    지금 당신의 감정에 맞춘 여행을 추천해드립니다 ✨
+  </p>
+  <LoginButton />
+</div>
       )}
     </div>
   );
