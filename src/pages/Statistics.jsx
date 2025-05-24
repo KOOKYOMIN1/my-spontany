@@ -1,7 +1,7 @@
+import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import MoodChart from '../components/MoodChart';
-import { useEffect, useState } from 'react';
 
 function Statistics() {
   const [moodCounts, setMoodCounts] = useState({});
@@ -13,7 +13,6 @@ function Statistics() {
       if (!user) return;
 
       try {
-        // ✅ 유저 UID로 정확한 경로 지정
         const entriesRef = collection(db, 'plans', user.uid, 'entries');
         const snapshot = await getDocs(entriesRef);
 
@@ -25,9 +24,10 @@ function Statistics() {
           }
         });
 
+        console.log("🔥 moodCounts:", moodFrequency); // 디버깅용
         setMoodCounts(moodFrequency);
       } catch (error) {
-        console.error('❌ 감정 통계 불러오기 실패:', error);
+        console.error('❌ 감정 통계 불러오기 실패:', error.message || error);
       } finally {
         setLoading(false);
       }
@@ -42,7 +42,7 @@ function Statistics() {
       {loading ? (
         <p>데이터 불러오는 중...</p>
       ) : Object.keys(moodCounts).length === 0 ? (
-        <p>아직 여행 기록이 없습니다.</p>
+        <p className="text-gray-500">❗ 아직 저장된 감정 데이터가 없습니다.</p>
       ) : (
         <MoodChart data={moodCounts} />
       )}
