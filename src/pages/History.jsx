@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { getUserPlans } from "../utils/getUserPlans";
+import { deleteUserPlan } from "../utils/deleteUserPlan";
 
 function History() {
   const [plans, setPlans] = useState([]);
@@ -9,13 +10,21 @@ function History() {
     const fetchPlans = async () => {
       const user = auth.currentUser;
       if (!user) return;
-
       const data = await getUserPlans(user.uid);
       setPlans(data);
     };
-
     fetchPlans();
   }, []);
+
+  const handleDelete = async (planId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const confirm = window.confirm("정말 이 여행 기록을 삭제할까요?");
+    if (!confirm) return;
+
+    await deleteUserPlan(user.uid, planId);
+    setPlans((prev) => prev.filter((p) => p.id !== planId));
+  };
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
@@ -27,11 +36,18 @@ function History() {
         <p className="text-gray-500 text-center">여행 기록이 없습니다.</p>
       ) : (
         <div className="grid gap-6">
-          {plans.map((plan, idx) => (
+          {plans.map((plan) => (
             <div
-              key={plan.id || idx}
-              className="bg-white shadow-md rounded-xl p-6"
+              key={plan.id}
+              className="bg-white shadow-md rounded-xl p-6 relative"
             >
+              <button
+                onClick={() => handleDelete(plan.id)}
+                className="absolute top-3 right-3 text-red-500 hover:text-red-700 text-sm"
+              >
+                🗑️ 삭제
+              </button>
+
               <p><strong>출발지:</strong> {plan.departure}</p>
               <p><strong>예산:</strong> ₩{plan.budget.toLocaleString()}</p>
               <p><strong>감정:</strong> {plan.mood}</p>
