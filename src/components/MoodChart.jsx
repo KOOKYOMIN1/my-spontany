@@ -1,9 +1,19 @@
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#00c49f', '#ff69b4'];
 
 function MoodChart({ data }) {
-  // 객체를 recharts에서 사용하는 배열 형태로 변환
+  if (!data || Object.keys(data).length === 0) {
+    return <p className="text-gray-500">표시할 감정 데이터가 없습니다.</p>;
+  }
+
   const chartData = Object.entries(data).map(([mood, count]) => ({
     name: mood,
     value: count,
