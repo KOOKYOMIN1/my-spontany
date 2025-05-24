@@ -53,7 +53,7 @@ function App() {
           <img
             src="https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg"
             alt="여행 감성"
-            className="w-full h-48 object-cover rounded-2xl mb-6"
+            className="w-full h-24 object-cover rounded-2xl mb-6"
           />
           <h1 className="text-2xl font-bold text-blue-500 mb-2">Spontany ✈️</h1>
           <p className="text-gray-700 mb-4">
