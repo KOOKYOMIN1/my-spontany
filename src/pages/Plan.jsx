@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { saveUserPlan } from '../utils/saveUserPlan';
-import { generateEmotionMessage } from '../utils/generateEmotionMessage'; // ✨ 추가
 import LoginButton from '../components/LoginButton';
 import DestinationPhotoViewer from '../components/DestinationPhotoViewer';
 
@@ -11,7 +10,6 @@ function Plan() {
   const [budget, setBudget] = useState('');
   const [mood, setMood] = useState('');
   const [isWithCompanion, setIsWithCompanion] = useState(false);
-  const [emotionMessage, setEmotionMessage] = useState(''); // ✨ 감성 문장 상태
 
   const navigate = useNavigate();
 
@@ -52,16 +50,6 @@ function Plan() {
     });
 
     navigate(`/result?${params.toString()}`);
-  };
-
-  // ✨ 감성 문장 생성
-  const handleGenerateMessage = async () => {
-    if (!mood) {
-      alert("먼저 감정을 선택해주세요!");
-      return;
-    }
-    const result = await generateEmotionMessage(mood);
-    setEmotionMessage(result);
   };
 
   return (
@@ -117,19 +105,6 @@ function Plan() {
           </button>
         ))}
       </div>
-
-      {/* ✨ 감성 문장 생성 버튼 */}
-      <button
-        onClick={handleGenerateMessage}
-        className="mb-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        💬 감성 문장 생성하기
-      </button>
-
-      {/* 생성된 감성 문장 출력 */}
-      {emotionMessage && (
-        <p className="mt-2 text-indigo-700 italic text-sm">💡 {emotionMessage}</p>
-      )}
 
       {/* 동행 여부 */}
       <label className="block mt-6 mb-2">동행 찾기:</label>
