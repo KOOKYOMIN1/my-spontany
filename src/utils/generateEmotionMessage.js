@@ -1,27 +1,36 @@
-export const generateEmotionMessage = async (mood) => {
-  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+// src/utils/generateEmotionMessage.js
+import axios from "axios";
 
-  const systemPrompt = `당신은 감정을 기반으로 감성적인 여행 문장을 만들어주는 여행 작가입니다. 사용자 감정에 따라 감동적인 한 줄을 생성하세요. 너무 길지 않게 자연스럽고 따뜻한 느낌으로 써주세요.`;
+export const generateEmotionMessage = async (emotion) => {
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "너는 감성 여행 카피라이터야. 감정에 맞춰 여행 추천 문구를 1문장 생성해줘.",
+          },
+          {
+            role: "user",
+            content: `${emotion} 감정에 맞는 여행 문장을 하나 써줘`,
+          },
+        ],
+        temperature: 0.8,
+        max_tokens: 60,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  const userPrompt = `"${mood}"이라는 감정에 어울리는 여행 한 줄 추천 문장을 만들어줘.`;
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.8,
-      max_tokens: 100,
-    }),
-  });
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() || "감성 문장 생성 실패";
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("❌ 감정 문장 생성 실패:", error);
+    return "여행은 언제나 당신에게 필요한 순간이에요 ✨";
+  }
 };
