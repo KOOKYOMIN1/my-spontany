@@ -1,6 +1,7 @@
-// ✅ Result.jsx 수정본: 사진 크기 축소 + 여러 장 슬라이드 형태로 보기
+// ✅ Result.jsx 수정본: 이미지 슬라이더 정상작동을 위해 onAuthStateChanged 적용
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 import FlightSearch from "../components/FlightSearch";
 
@@ -12,7 +13,6 @@ function Result() {
   const mood = params.get("mood") || "기분전환";
   const withCompanion = params.get("withCompanion") === "true";
   const entryId = params.get("planId");
-  const user = auth.currentUser;
 
   const [shareUrl, setShareUrl] = useState("");
   const [imageList, setImageList] = useState([]);
@@ -50,10 +50,13 @@ function Result() {
   const destinationCode = cityToIATACode[selected.city] || "ICN";
 
   useEffect(() => {
-    if (user && entryId) {
-      setShareUrl(`${window.location.origin}/share/${user.uid}-${entryId}`);
-    }
-  }, [user, entryId]);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && entryId) {
+        setShareUrl(`${window.location.origin}/share/${user.uid}-${entryId}`);
+      }
+    });
+    return () => unsubscribe();
+  }, [entryId]);
 
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
@@ -156,15 +159,22 @@ function Result() {
         <p className="text-center text-gray-600 italic">{selected.message}</p>
 
         {imageList.length > 0 && (
-          <div className="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
-            <img src={imageList[imageIndex]} alt="여행지" className="w-full h-full object-cover transition" />
-            <div className="absolute top-1/2 left-0 transform -translate-y-1/2 px-2">
-              <button onClick={() => setImageIndex((imageIndex - 1 + imageList.length) % imageList.length)} className="bg-white/70 rounded-full px-2">◀</button>
+          <>
+            <p className="text-sm text-center text-gray-400">({imageIndex + 1}/{imageList.length})</p>
+            <div className="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
+              <img
+                src={imageList[imageIndex]}
+                alt="여행지"
+                className="w-full h-full object-cover transition duration-300"
+              />
+              <div className="absolute top-1/2 left-0 transform -translate-y-1/2 px-2">
+                <button onClick={() => setImageIndex((imageIndex - 1 + imageList.length) % imageList.length)} className="bg-white/70 rounded-full px-2">◀</button>
+              </div>
+              <div className="absolute top-1/2 right-0 transform -translate-y-1/2 px-2">
+                <button onClick={() => setImageIndex((imageIndex + 1) % imageList.length)} className="bg-white/70 rounded-full px-2">▶</button>
+              </div>
             </div>
-            <div className="absolute top-1/2 right-0 transform -translate-y-1/2 px-2">
-              <button onClick={() => setImageIndex((imageIndex + 1) % imageList.length)} className="bg-white/70 rounded-full px-2">▶</button>
-            </div>
-          </div>
+          </>
         )}
 
         <div className="bg-gradient-to-br from-pink-100 to-yellow-100 border border-pink-200 rounded-2xl shadow-md p-6 relative">
