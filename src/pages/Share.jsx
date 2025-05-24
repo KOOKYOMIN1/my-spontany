@@ -7,6 +7,7 @@ export default function Share() {
   const { id } = useParams();
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -28,20 +29,38 @@ export default function Share() {
     fetchPlan();
   }, [id]);
 
-  if (loading) {
-    return <div className="p-10 text-center text-gray-500 animate-pulse">✈️ 여행 계획을 불러오는 중입니다...</div>;
-  }
+  // 📸 Pexels 이미지 불러오기
+  useEffect(() => {
+    if (!plan) return;
+    const city = emotionToCityMap[plan.mood]?.city || "Osaka";
 
-  if (!plan) {
-    return <div className="p-10 text-center text-red-500">❌ 계획을 찾을 수 없습니다.</div>;
-  }
+    const randomPage = Math.floor(Math.random() * 10) + 1;
+    const randomIndex = Math.floor(Math.random() * 5);
 
-  // 도시 매핑 (감정 기반 추천)
+    fetch(`https://api.pexels.com/v1/search?query=${city}&per_page=5&page=${randomPage}`, {
+      headers: {
+        Authorization: import.meta.env.VITE_PEXELS_API_KEY,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        const fallback = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+        const img = data.photos?.[randomIndex]?.src?.large || data.photos?.[0]?.src?.large || fallback;
+        setImageUrl(img);
+      })
+      .catch(() => {
+        setImageUrl("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
+      });
+  }, [plan]);
+
   const emotionToCityMap = {
     기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
     힐링: { city: "Bali", message: "발리의 따뜻한 바람이 당신을 감싸줄 거예요 🌴" },
     설렘: { city: "Paris", message: "파리의 밤, 에펠탑 아래 당신의 마음이 두근거릴 거예요 💘" },
   };
+
+  if (loading) return <div className="p-10 text-center text-gray-500">✈️ 여행 계획을 불러오는 중입니다...</div>;
+  if (!plan) return <div className="p-10 text-center text-red-500">❌ 계획을 찾을 수 없습니다.</div>;
 
   const selected = emotionToCityMap[plan.mood] || {
     city: "오사카",
@@ -66,11 +85,13 @@ export default function Share() {
           <h2 className="text-xl font-bold text-green-700">✨ 추천 여행지: {selected.city}</h2>
           <p className="text-gray-600 italic">{selected.message}</p>
 
-          <img
-            src={`https://source.unsplash.com/featured/600x400/?${selected.city}`}
-            alt={selected.city}
-            className="w-full h-64 object-cover rounded-xl shadow-lg mt-4"
-          />
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt={selected.city}
+              className="w-full h-64 object-cover rounded-xl shadow-lg mt-4"
+            />
+          )}
         </div>
       </div>
 
