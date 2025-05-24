@@ -21,52 +21,52 @@ function Result() {
   };
 
   const [imageUrl, setImageUrl] = useState("");
-  const [aiMessage, setAiMessage] = useState("문장을 생성 중입니다...");
+  const [aiMessage, setAiMessage] = useState("⏳ 감성 문장을 생성 중입니다...");
   const [copied, setCopied] = useState(false);
-  const lastRequestTimeRef = useRef(0); // 쿨타임 추적
+  const lastRequestTimeRef = useRef(0);
 
-  // 📸 도시 이미지 가져오기
+  // 📸 Pexels 이미지 불러오기
   useEffect(() => {
-  if (selected.city !== "오사카") {
-    const randomPage = Math.floor(Math.random() * 10) + 1; // 1~10페이지 중 랜덤
-    const randomIndex = Math.floor(Math.random() * 5); // 0~4
+    if (selected.city !== "오사카") {
+      const randomPage = Math.floor(Math.random() * 10) + 1;
+      const randomIndex = Math.floor(Math.random() * 5);
 
-    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5&page=${randomPage}`, {
-      headers: {
-        Authorization: import.meta.env.VITE_PEXELS_API_KEY,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.photos.length > 0) {
-          const randomImage = data.photos[randomIndex]?.src?.large || data.photos[0].src.large;
-          setImageUrl(randomImage);
-          console.log("📸 랜덤 이미지 (page", randomPage, "):", randomImage);
-        }
+      fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5&page=${randomPage}`, {
+        headers: {
+          Authorization: import.meta.env.VITE_PEXELS_API_KEY,
+        },
       })
-      .catch((err) => {
-        console.error("❌ Pexels 이미지 불러오기 실패:", err);
-      });
-  }
-}, [selected.city]);
+        .then(res => res.json())
+        .then(data => {
+          if (data.photos.length > 0) {
+            const randomImage = data.photos[randomIndex]?.src?.large || data.photos[0].src.large;
+            setImageUrl(randomImage);
+            console.log("📸 랜덤 이미지:", randomImage);
+          }
+        })
+        .catch(err => {
+          console.error("❌ Pexels 이미지 불러오기 실패:", err);
+        });
+    }
+  }, [selected.city]);
 
-  // 💡 감성 문장 요청 (프록시 + 쿨타임 + 캐시)
+  // 💬 GPT 감성 문장 생성
   useEffect(() => {
     const fetchThemeSentence = async () => {
       const now = Date.now();
+      const cacheKey = `themeCache:${mood}:${departure}:${budget}`;
 
-      // ⏱ 쿨타임 10초
-      if (now - lastRequestTimeRef.current < 10000) {
-        console.log("⏳ 쿨타임 중 – 중복 요청 차단");
+      // 캐시 사용
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        console.log("♻️ 캐시된 문장 사용:", cached);
+        setAiMessage(cached);
         return;
       }
 
-      // 캐시 확인
-      const cacheKey = `themeCache:${mood}:${departure}:${budget}`;
-      const cachedMessage = localStorage.getItem(cacheKey);
-      if (cachedMessage) {
-        console.log("♻️ 캐시된 감성 문장 사용:", cachedMessage);
-        setAiMessage(cachedMessage);
+      // 쿨타임 체크
+      if (now - lastRequestTimeRef.current < 10000) {
+        console.log("⏳ 쿨타임 중 - 요청 차단");
         return;
       }
 
@@ -75,7 +75,7 @@ function Result() {
       const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
 
       try {
-        const response = await fetch("/api/generate-theme", {
+        const res = await fetch("/api/generate-theme", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -83,14 +83,14 @@ function Result() {
           body: JSON.stringify({ prompt }),
         });
 
-        const data = await response.json();
-        const message = data.message || "여행 테마를 불러오는 데 문제가 발생했어요.";
-        setAiMessage(message);
+        const data = await res.json();
+        console.log("🌈 GPT 응답:", data);
 
-        // 캐시에 저장
-        localStorage.setItem(cacheKey, message);
+        const msg = data.message || "여행 테마를 불러오는 데 문제가 발생했어요.";
+        setAiMessage(msg);
+        localStorage.setItem(cacheKey, msg);
       } catch (error) {
-        console.error("❌ 감성 문장 프록시 호출 실패:", error);
+        console.error("❌ GPT 프록시 호출 실패:", error);
         setAiMessage("여행 테마를 불러오는 데 실패했어요.");
       }
     };
@@ -127,7 +127,7 @@ function Result() {
       )}
 
       <h2 className="text-xl font-semibold mb-2">💡 AI 감성 한 줄</h2>
-      <p className="text-lg text-gray-800 mb-6">{aiMessage}</p>
+      <p className="text-lg text-gray-800 italic mb-6 whitespace-pre-line">{aiMessage}</p>
 
       <button
         onClick={handleCopyLink}
