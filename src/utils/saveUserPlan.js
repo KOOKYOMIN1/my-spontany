@@ -1,10 +1,10 @@
-import { collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export const saveUserPlan = async (uid, planData) => {
   try {
     const planId = Date.now().toString();
-    const ref = doc(collection(doc(db, "plans", uid), "entries"), planId);
+    const ref = doc(db, "plans", uid, "entries", planId); // ✅ 수정됨
     await setDoc(ref, planData);
     console.log("✅ Firestore 저장 성공");
   } catch (error) {
