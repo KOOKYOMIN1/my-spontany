@@ -41,7 +41,7 @@ function Plan() {
       departure,
       budget: Number(budget),
       mood,
-      withCompanion: isWithCompanion,
+      withCompanion: Boolean(isWithCompanion),
       timestamp: Date.now(),
     };
 
