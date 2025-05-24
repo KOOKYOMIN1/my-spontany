@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { generateEmotionMessage } from "../utils/generateEmotionMessage";
+import { Configuration, OpenAIApi } from "openai";
 
 function Result() {
   const { search } = useLocation();
@@ -9,10 +9,6 @@ function Result() {
   const departure = params.get("departure");
   const budget = params.get("budget");
   const companion = params.get("companion");
-
-  const [aiMessage, setAiMessage] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [copied, setCopied] = useState(false);
 
   const emotionToCityMap = {
     기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
@@ -24,6 +20,10 @@ function Result() {
     city: "오사카",
     message: "오사카에서 맛있는 음식과 힐링을 동시에 즐겨보세요 🍜",
   };
+
+  const [imageUrl, setImageUrl] = useState("");
+  const [aiMessage, setAiMessage] = useState("문장을 생성 중입니다...");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (selected.city !== "오사카") {
@@ -42,10 +42,31 @@ function Result() {
   }, [selected.city]);
 
   useEffect(() => {
-    if (mood) {
-      generateEmotionMessage(mood).then(setAiMessage);
-    }
-  }, [mood]);
+    const fetchThemeSentence = async () => {
+      const configuration = new Configuration({
+        apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      });
+      const openai = new OpenAIApi(configuration);
+
+      try {
+        const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
+
+        const response = await openai.createChatCompletion({
+          model: "gpt-4",
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 60,
+        });
+
+        const message = response.data.choices[0].message.content.trim();
+        setAiMessage(message);
+      } catch (error) {
+        console.error("❌ 감성 문장 생성 실패:", error);
+        setAiMessage("여행 테마를 불러오는 데 실패했어요.");
+      }
+    };
+
+    fetchThemeSentence();
+  }, [mood, departure, budget, selected.city]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -76,7 +97,7 @@ function Result() {
       )}
 
       <h2 className="text-xl font-semibold mb-2">💡 AI 감성 한 줄</h2>
-      <p className="text-lg text-gray-800 mb-6">{aiMessage || "문장을 생성 중입니다..."}</p>
+      <p className="text-lg text-gray-800 mb-6">{aiMessage}</p>
 
       <button
         onClick={handleCopyLink}
