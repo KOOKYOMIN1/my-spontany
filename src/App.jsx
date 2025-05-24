@@ -29,7 +29,7 @@ function App() {
   };
 
   return (
-    <div className="App text-center p-8">
+    <div className="App text-center p-8 min-h-screen bg-gradient-to-r from-yellow-50 to-yellow-200">
       <h1 className="text-3xl font-bold text-blue-600 mb-6">Spontany ✈️</h1>
 
       {user ? (
@@ -49,13 +49,16 @@ function App() {
           </Routes>
         </>
       ) : (
-        <div className="login-card">
+        <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-8">
           <img
-            src="https://source.unsplash.com/400x200/?travel,freedom"
+            src="https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg"
             alt="여행 감성"
+            className="w-full h-48 object-cover rounded-2xl mb-6"
           />
-          <h1>Spontany ✈️</h1>
-          <p className="mb-4">지금 당신의 감정에 맞춘 여행을 추천해드립니다 ✨</p>
+          <h1 className="text-2xl font-bold text-blue-500 mb-2">Spontany ✈️</h1>
+          <p className="text-gray-700 mb-4">
+            지금 당신의 감정에 맞춘 여행을 추천해드립니다 ✨
+          </p>
           <LoginButton />
         </div>
       )}
