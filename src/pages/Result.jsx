@@ -22,9 +22,16 @@ function Result() {
 
   const [imageUrl, setImageUrl] = useState("");
   const [aiMessage, setAiMessage] = useState("⏳ 감성 문장을 생성 중입니다...");
+  const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
 
+  // 공유 링크 생성
+  const user = JSON.parse(localStorage.getItem("firebase:authUser"));
+  const planId = `${user?.uid}-${Math.floor(Date.now() / 1000)}`;
+  const shareUrl = `${window.location.origin}/share/${planId}`;
+
+  // 📸 이미지 가져오기
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
     const randomIndex = Math.floor(Math.random() * 5);
@@ -36,16 +43,16 @@ function Result() {
     })
       .then(res => res.json())
       .then(data => {
-        const randomImage = data?.photos?.[randomIndex]?.src?.large || data?.photos?.[0]?.src?.large;
-        if (randomImage) {
-          setImageUrl(randomImage);
-        }
+        const fallbackImage = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+        const randomImage = data?.photos?.[randomIndex]?.src?.large || data?.photos?.[0]?.src?.large || fallbackImage;
+        setImageUrl(randomImage);
       })
-      .catch(err => {
-        console.error("❌ 이미지 불러오기 실패:", err);
+      .catch(() => {
+        setImageUrl("https://images.unsplash.com/photo-1507525428034-b723cf961d3e"); // fallback
       });
   }, [selected.city]);
 
+  // 🎨 감성 문장 생성
   useEffect(() => {
     const fetchThemeSentence = async () => {
       const now = Date.now();
@@ -73,8 +80,7 @@ function Result() {
         const msg = data.message || "여행 테마를 불러오는 데 문제가 발생했어요.";
         setAiMessage(msg);
         localStorage.setItem(cacheKey, msg);
-      } catch (err) {
-        console.error("❌ GPT 호출 실패:", err);
+      } catch {
         setAiMessage("AI 감성 문장을 불러오는 데 실패했어요.");
       }
     };
@@ -82,8 +88,29 @@ function Result() {
     fetchThemeSentence();
   }, [mood, departure, budget, selected.city]);
 
+  // 📅 GPT 여행 일정 생성
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      try {
+        const res = await fetch("/api/generate-itinerary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mood, destination: selected.city, days: 3 }),
+        });
+
+        const data = await res.json();
+        setSchedule(data.text || "일정을 생성하지 못했습니다.");
+      } catch {
+        setSchedule("GPT로 여행 일정을 불러오는 데 실패했어요.");
+      }
+    };
+
+    fetchSchedule();
+  }, [mood, selected.city]);
+
+  // 🔗 공유 링크 복사
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -123,14 +150,19 @@ function Result() {
         </div>
       </div>
 
+      <h2 className="text-xl font-semibold mt-10 mb-3">📅 GPT 여행 일정 추천</h2>
+      <div className="bg-white border border-gray-200 rounded-xl shadow p-4 text-left whitespace-pre-wrap">
+        {schedule}
+      </div>
+
       <button
         onClick={handleCopyLink}
         className="mt-6 bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
       >
-        🔗 여행 계획 링크 복사
+        🔗 여행 공유 링크 복사
       </button>
       {copied && (
-        <p className="mt-2 text-green-500 text-sm">링크 복사 완료! 친구에게 공유해보세요 😊</p>
+        <p className="mt-2 text-green-500 text-sm">복사 완료! 친구에게 공유해보세요 😊</p>
       )}
     </div>
   );
