@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import FlightSearch from "../components/FlightSearch";
+import FlightSearch from "../components/FlightSearch"; // ✅ 반드시 상단에 import
 
 function Result() {
   const { search } = useLocation();
@@ -30,6 +30,9 @@ function Result() {
   const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
+
+  // ✅ 404 방지용 출발지 기본값
+  const origin = departure === "미지의 공간" ? "Seoul" : departure;
 
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
@@ -174,7 +177,8 @@ function Result() {
         <p className="mt-2 text-green-500 text-sm">복사 완료! 친구에게 공유해보세요 😊</p>
       )}
 
-      <FlightSearch originCity={departure} destinationCity={selected.city} />
+      {/* ✅ 항공권 검색 연동 */}
+      <FlightSearch originCity={origin} destinationCity={selected.city} />
     </div>
   );
 }
