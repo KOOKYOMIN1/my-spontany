@@ -8,7 +8,7 @@ function FlightSearch({ originCity, destinationCity }) {
     setLoading(true);
     try {
       const res = await fetch(
-        `https://kiwi-com-cheap-flights.p.rapidapi.com/flights?fly_from=${originCity}&fly_to=${destinationCity}&date_from=${getDate(7)}&date_to=${getDate(7)}&curr=KRW`,
+        `https://kiwi-com-cheap-flights.p.rapidapi.com/search-flights?fly_from=${originCity}&fly_to=${destinationCity}&date_from=${getDate(7)}&date_to=${getDate(7)}&curr=KRW`,
         {
           method: "GET",
           headers: {
