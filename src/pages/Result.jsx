@@ -8,6 +8,10 @@ function Result() {
   const budget = params.get("budget") || "알 수 없음";
   const mood = params.get("mood") || "기분전환";
   const withCompanion = params.get("withCompanion") === "true";
+  const planId = params.get("planId"); // ✅ URL에서 받아온 공유용 ID
+  const shareUrl = planId
+    ? `${window.location.origin}/share/${planId}`
+    : `${window.location.origin}`; // fallback
 
   const emotionToCityMap = {
     기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
@@ -25,11 +29,6 @@ function Result() {
   const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
-
-  // ✅ 공유 링크 생성
-  const user = JSON.parse(localStorage.getItem("firebase:authUser"));
-  const planId = `${user?.uid}-${Math.floor(Date.now() / 1000)}`;
-  const shareUrl = `${window.location.origin}/share/${planId}`;
 
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
@@ -155,7 +154,6 @@ function Result() {
         {schedule}
       </div>
 
-      {/* 🔗 공유 버튼 그룹 */}
       <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={handleCopyLink}

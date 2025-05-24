@@ -45,16 +45,21 @@ function Plan() {
       timestamp: Date.now(),
     };
 
-    await saveUserPlan(user.uid, planData);
+    // ✅ 저장하고 entryId 받아오기
+    const entryId = await saveUserPlan(user.uid, planData);
 
+    // ✅ 공유 링크 구성용 planId
+    const planId = `${user.uid}-${entryId}`;
+
+    // ✅ URL 파라미터로도 이동
     const params = new URLSearchParams({
       departure,
       budget,
       mood,
-      withCompanion: isWithCompanion, // ✅ companion → withCompanion으로 맞춤
+      withCompanion: isWithCompanion,
     });
 
-    navigate(`/result?${params.toString()}`);
+    navigate(`/result?${params.toString()}&planId=${planId}`); // 결과 페이지로 이동
   };
 
   return (
@@ -65,35 +70,27 @@ function Plan() {
 
       <LoginButton />
 
-      {/* 출발지 입력 */}
+      {/* 출발지 */}
       <label className="block mb-2 mt-6">출발지:</label>
       <input
         type="text"
         value={departure}
         onChange={(e) => setDeparture(e.target.value)}
         placeholder="예: Seoul"
-        className="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="border border-gray-300 p-2 rounded w-full mb-4"
       />
 
-      {/* 여행 기간 (UI만) */}
-      <label className="block mb-2">여행 기간:</label>
-      <input
-        type="text"
-        placeholder="예: 2025-06-01 ~ 06-04"
-        className="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-      />
-
-      {/* 예산 입력 */}
+      {/* 예산 */}
       <label className="block mb-2">예산 (₩):</label>
       <input
         type="number"
         value={budget}
         onChange={(e) => setBudget(e.target.value)}
         placeholder="₩ 1000000"
-        className="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="border border-gray-300 p-2 rounded w-full mb-4"
       />
 
-      {/* 감정 선택 */}
+      {/* 감정 */}
       <label className="block mb-2">감정 선택:</label>
       <div className="flex gap-3 mb-4">
         {emotions.map(({ label, emoji }) => (
@@ -101,17 +98,16 @@ function Plan() {
             key={label}
             type="button"
             onClick={() => setMood(label)}
-            className={`px-4 py-2 rounded-full border transition-all duration-200
-              ${mood === label
-                ? 'bg-blue-500 text-white border-blue-500 shadow-md scale-105'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}
+            className={`px-4 py-2 rounded-full border ${
+              mood === label ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
+            }`}
           >
             {emoji} {label}
           </button>
         ))}
       </div>
 
-      {/* 동행 여부 */}
+      {/* 동행 */}
       <label className="block mt-6 mb-2">동행 찾기:</label>
       <label className="flex items-center mb-6">
         <input
@@ -123,35 +119,16 @@ function Plan() {
         {isWithCompanion ? '동행' : '혼자'}
       </label>
 
-      {/* 여행 생성 */}
+      {/* 버튼 */}
       <button
         onClick={handleSubmit}
-        className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded transition"
+        className="w-full bg-indigo-500 text-white py-2 px-4 rounded"
       >
         ✨ 즉흥 여행 생성하기
       </button>
 
-      {/* 감성 사진 */}
       <div className="mt-12">
         <DestinationPhotoViewer />
-      </div>
-
-      {/* 감정 통계 버튼 */}
-      <div className="mt-10 text-center">
-        <button
-          onClick={() => navigate('/statistics')}
-          style={{
-            backgroundColor: '#6b46c1',
-            color: '#fff',
-            padding: '10px 20px',
-            borderRadius: '9999px',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-            cursor: 'pointer',
-          }}
-        >
-          📊 나의 감정 통계 보기
-        </button>
       </div>
     </div>
   );
