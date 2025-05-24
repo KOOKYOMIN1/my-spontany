@@ -49,13 +49,15 @@ function App() {
           </Routes>
         </>
       ) : (
-        <>
-          <p className="mb-4">로그인 해주세요</p>
+        <div className="login-card">
+          <img
+            src="https://source.unsplash.com/400x200/?travel,freedom"
+            alt="여행 감성"
+          />
+          <h1>Spontany ✈️</h1>
+          <p className="mb-4">지금 당신의 감정에 맞춘 여행을 추천해드립니다 ✨</p>
           <LoginButton />
-          <p className="mt-4 text-gray-500 text-sm">
-            감정 기반 즉흥 여행을 추천해드립니다 ✨
-          </p>
-        </>
+        </div>
       )}
     </div>
   );
