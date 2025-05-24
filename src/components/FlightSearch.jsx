@@ -1,3 +1,4 @@
+// src/components/FlightSearch.jsx
 import { useState } from "react";
 
 function FlightSearch({ originCity, destinationCity }) {
@@ -17,11 +18,10 @@ function FlightSearch({ originCity, destinationCity }) {
           },
         }
       );
-
       const data = await res.json();
       setFlights(data.data || []);
-    } catch (error) {
-      console.error("❌ 항공권 검색 실패:", error);
+    } catch (err) {
+      console.error("❌ Kiwi 항공권 실패:", err);
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ function FlightSearch({ originCity, destinationCity }) {
   };
 
   return (
-    <div className="mt-10 bg-white p-6 rounded-xl shadow-md">
+    <div className="mt-12 bg-white p-6 rounded-xl shadow-md">
       <h2 className="text-xl font-bold text-blue-600 mb-4">🛫 항공권 검색</h2>
       <p className="text-sm text-gray-500 mb-2">
         {originCity} → {destinationCity} / 출발: {getDate(7)}

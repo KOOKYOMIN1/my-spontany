@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import FlightSearch from "../components/FlightSearch";
 
 function Result() {
   const { search } = useLocation();
@@ -8,10 +9,10 @@ function Result() {
   const budget = params.get("budget") || "알 수 없음";
   const mood = params.get("mood") || "기분전환";
   const withCompanion = params.get("withCompanion") === "true";
-  const planId = params.get("planId"); // ✅ URL에서 받아온 공유용 ID
+  const planId = params.get("planId");
   const shareUrl = planId
     ? `${window.location.origin}/share/${planId}`
-    : `${window.location.origin}`; // fallback
+    : `${window.location.origin}`;
 
   const emotionToCityMap = {
     기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
@@ -172,6 +173,8 @@ function Result() {
       {copied && (
         <p className="mt-2 text-green-500 text-sm">복사 완료! 친구에게 공유해보세요 😊</p>
       )}
+
+      <FlightSearch originCity={departure} destinationCity={selected.city} />
     </div>
   );
 }
