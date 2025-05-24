@@ -1,4 +1,3 @@
-// src/components/FlightSearch.jsx
 import { useState } from "react";
 
 function FlightSearch({ originCity, destinationCity }) {
@@ -9,19 +8,20 @@ function FlightSearch({ originCity, destinationCity }) {
     setLoading(true);
     try {
       const res = await fetch(
-        `https://kiwi-flight-search.p.rapidapi.com/flights?fly_from=${originCity}&fly_to=${destinationCity}&date_from=${getDate(7)}&date_to=${getDate(7)}&curr=KRW`,
+        `https://kiwi-com-cheap-flights.p.rapidapi.com/flights?fly_from=${originCity}&fly_to=${destinationCity}&date_from=${getDate(7)}&date_to=${getDate(7)}&curr=KRW`,
         {
           method: "GET",
           headers: {
             "X-RapidAPI-Key": import.meta.env.VITE_KIWI_API_KEY,
-            "X-RapidAPI-Host": "kiwi-flight-search.p.rapidapi.com",
+            "X-RapidAPI-Host": "kiwi-com-cheap-flights.p.rapidapi.com",
           },
         }
       );
+
       const data = await res.json();
       setFlights(data.data || []);
     } catch (err) {
-      console.error("❌ Kiwi 항공권 실패:", err);
+      console.error("❌ Kiwi API 호출 실패:", err);
     } finally {
       setLoading(false);
     }
@@ -52,8 +52,8 @@ function FlightSearch({ originCity, destinationCity }) {
         <ul className="space-y-4 text-left">
           {flights.slice(0, 5).map((f, idx) => (
             <li key={idx} className="border p-4 rounded-xl shadow-sm">
-              <p><strong>항공사:</strong> {f.airlines?.[0]}</p>
-              <p><strong>가격:</strong> ₩{f.price?.toLocaleString()}</p>
+              <p><strong>항공사:</strong> {f.airlines?.[0] || "확인 불가"}</p>
+              <p><strong>가격:</strong> ₩{f.price?.toLocaleString() || "없음"}</p>
               <p><strong>출발:</strong> {new Date(f.dTimeUTC * 1000).toLocaleString()}</p>
               <p><strong>도착:</strong> {new Date(f.aTimeUTC * 1000).toLocaleString()}</p>
               <a
