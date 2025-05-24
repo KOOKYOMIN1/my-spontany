@@ -1,4 +1,4 @@
-// ✅ Result.jsx 수정본: 이미지 작게 + 슬라이드 + 클릭 시 확대 보기
+// ✅ Result.jsx 최종 감성 리디자인: 이미지 갤러리 스타일로 변경
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -16,12 +16,11 @@ function Result() {
 
   const [shareUrl, setShareUrl] = useState("");
   const [imageList, setImageList] = useState([]);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
   const [aiMessage, setAiMessage] = useState("⏳ 감성 문장을 생성 중입니다...");
   const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
+  const [activeImage, setActiveImage] = useState(null); // 확대용 이미지
 
   const origin = departure === "미지의 공간" ? "Seoul" : departure;
 
@@ -61,7 +60,7 @@ function Result() {
 
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
-    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=6&page=${randomPage}`, {
+    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=12&page=${randomPage}`, {
       headers: { Authorization: import.meta.env.VITE_PEXELS_API_KEY },
     })
       .then(res => res.json())
@@ -130,7 +129,7 @@ function Result() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fdfbfb] to-[#ebedee] flex flex-col items-center py-10 px-4">
-      <div className="max-w-2xl w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 space-y-6">
+      <div className="max-w-3xl w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 space-y-6">
         <h1 className="text-3xl font-bold text-center text-gray-800">당신에게 어울리는 여행</h1>
         <div className="text-md text-gray-700 text-center space-y-1">
           <p>📍 출발지: <strong>{departure}</strong></p>
@@ -143,49 +142,27 @@ function Result() {
         </div>
         <p className="text-center text-gray-600 italic">{selected.message}</p>
 
-        {/* 썸네일 리스트 */}
-        {imageList.length > 0 && (
-          <>
-            <div className="flex gap-2 overflow-x-auto py-2">
-              {imageList.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt={`thumb-${i}`}
-                  className={`h-24 w-36 object-cover rounded-lg cursor-pointer border ${imageIndex === i ? "border-pink-500" : "border-transparent"}`}
-                  onClick={() => setImageIndex(i)}
-                />
-              ))}
-            </div>
-            <div
-              className={`relative cursor-pointer transition duration-300 ${isZoomed ? "scale-[2.5] z-50" : "scale-100"}`}
-              onClick={() => setIsZoomed(!isZoomed)}
-            >
-              <img
-                src={imageList[imageIndex]}
-                alt="여행지 확대"
-                className="w-full h-52 object-cover rounded-xl shadow-md"
-              />
-              <div className="absolute top-1/2 left-0 transform -translate-y-1/2 px-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setImageIndex((imageIndex - 1 + imageList.length) % imageList.length);
-                  }}
-                  className="bg-white/70 rounded-full px-2"
-                >◀</button>
-              </div>
-              <div className="absolute top-1/2 right-0 transform -translate-y-1/2 px-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setImageIndex((imageIndex + 1) % imageList.length);
-                  }}
-                  className="bg-white/70 rounded-full px-2"
-                >▶</button>
-              </div>
-            </div>
-          </>
+        {/* 이미지 갤러리 */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {imageList.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt={`추천 이미지 ${idx}`}
+              className="w-full h-32 object-cover rounded-xl shadow-md cursor-pointer hover:scale-105 transition"
+              onClick={() => setActiveImage(img)}
+            />
+          ))}
+        </div>
+
+        {/* 확대 모달 */}
+        {activeImage && (
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
+            onClick={() => setActiveImage(null)}
+          >
+            <img src={activeImage} alt="확대 이미지" className="max-w-3xl max-h-[80vh] rounded-xl shadow-xl" />
+          </div>
         )}
 
         <div className="bg-gradient-to-br from-pink-100 to-yellow-100 border border-pink-200 rounded-2xl shadow-md p-6 relative">
