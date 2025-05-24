@@ -62,6 +62,7 @@ function Plan() {
       <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
         ✈️ Spontany 여행 계획하기
       </h1>
+    
 
       <LoginButton />
 
