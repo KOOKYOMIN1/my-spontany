@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 function Result() {
@@ -23,6 +23,7 @@ function Result() {
   const [imageUrl, setImageUrl] = useState("");
   const [aiMessage, setAiMessage] = useState("문장을 생성 중입니다...");
   const [copied, setCopied] = useState(false);
+  const lastRequestTimeRef = useRef(0); // ✅ 요청 시간 기억용
 
   // 📸 도시 이미지 가져오기
   useEffect(() => {
@@ -41,9 +42,16 @@ function Result() {
     }
   }, [selected.city]);
 
-  // 💡 GPT-4o 감성 문장 생성
+  // 💡 GPT-4o 감성 문장 생성 + 쿨타임 제한
   useEffect(() => {
     const fetchThemeSentence = async () => {
+      const now = Date.now();
+      if (now - lastRequestTimeRef.current < 10000) {
+        console.log("⏳ 쿨타임 중 – 중복 요청 차단");
+        return;
+      }
+      lastRequestTimeRef.current = now;
+
       console.log("✅ OpenAI 키:", import.meta.env.VITE_OPENAI_API_KEY);
 
       try {
@@ -56,7 +64,7 @@ function Result() {
             Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "gpt-4o", // ← 여기 GPT-4o로 변경됨
+            model: "gpt-4o",
             messages: [{ role: "user", content: prompt }],
             max_tokens: 60,
             temperature: 0.8,
