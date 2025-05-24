@@ -17,9 +17,20 @@ function Header({ user }) {
       <Link to="/" className="text-xl font-bold text-blue-600">
         Spontany ✈️
       </Link>
+
       {user ? (
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">안녕하세요, <strong>{user.displayName}</strong>님</span>
+          <Link
+            to="/history"
+            className="text-sm text-indigo-600 hover:underline"
+          >
+            📜 나의 히스토리
+          </Link>
+
+          <span className="text-sm text-gray-600">
+            안녕하세요, <strong>{user.displayName}</strong>님
+          </span>
+
           <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
