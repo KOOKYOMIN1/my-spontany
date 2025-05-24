@@ -23,9 +23,9 @@ function Result() {
   const [imageUrl, setImageUrl] = useState("");
   const [aiMessage, setAiMessage] = useState("문장을 생성 중입니다...");
   const [copied, setCopied] = useState(false);
-  const lastRequestTimeRef = useRef(0); // ✅ 요청 시간 기억용
+  const lastRequestTimeRef = useRef(0); // 쿨타임용
 
-  // 📸 도시 이미지 가져오기
+  // 📸 도시 이미지
   useEffect(() => {
     if (selected.city !== "오사카") {
       fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=1`, {
@@ -42,7 +42,7 @@ function Result() {
     }
   }, [selected.city]);
 
-  // 💡 GPT-4o 감성 문장 생성 + 쿨타임 제한
+  // 💡 프록시 서버로 감성 문장 요청
   useEffect(() => {
     const fetchThemeSentence = async () => {
       const now = Date.now();
@@ -52,30 +52,21 @@ function Result() {
       }
       lastRequestTimeRef.current = now;
 
-      console.log("✅ OpenAI 키:", import.meta.env.VITE_OPENAI_API_KEY);
+      const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
 
       try {
-        const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
-
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        const response = await fetch("/api/generate-theme", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
           },
-          body: JSON.stringify({
-            model: "gpt-4o",
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 60,
-            temperature: 0.8,
-          }),
+          body: JSON.stringify({ prompt }),
         });
 
         const data = await response.json();
-        const message = data.choices?.[0]?.message?.content?.trim();
-        setAiMessage(message || "여행 테마를 불러오는 데 문제가 발생했어요.");
+        setAiMessage(data.message || "여행 테마를 불러오는 데 문제가 발생했어요.");
       } catch (error) {
-        console.error("❌ 감성 문장 생성 실패:", error);
+        console.error("❌ 감성 문장 프록시 호출 실패:", error);
         setAiMessage("여행 테마를 불러오는 데 실패했어요.");
       }
     };
