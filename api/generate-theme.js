@@ -1,12 +1,10 @@
-// api/generate-theme.js
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const { prompt } = JSON.parse(req.body);
+    const { prompt } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     if (!prompt) {
       return res.status(400).json({ error: "No prompt provided" });
     }
@@ -15,7 +13,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // .env.local
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o",
@@ -26,7 +24,6 @@ export default async function handler(req, res) {
     });
 
     const data = await openaiRes.json();
-
     const message = data.choices?.[0]?.message?.content?.trim();
     return res.status(200).json({ message });
   } catch (error) {
