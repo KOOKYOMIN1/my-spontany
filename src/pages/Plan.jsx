@@ -136,15 +136,23 @@ function Plan() {
         <DestinationPhotoViewer />
       </div>
 
-      {/* 📊 감정 통계 보기 버튼 */}
-      <div className="mt-10 text-center">
-        <button
-          onClick={() => navigate('/statistics')}
-          className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-medium shadow-md transition"
-        >
-          📊 나의 감정 통계 보기
-        </button>
-      </div>
+    {/* 📊 감정 통계 보기 버튼 */}
+<div className="mt-10 text-center">
+  <button
+    onClick={() => navigate('/statistics')}
+    style={{
+      backgroundColor: '#6b46c1',
+      color: '#fff',
+      padding: '10px 20px',
+      borderRadius: '9999px',
+      fontWeight: 'bold',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+      cursor: 'pointer',
+    }}
+  >
+    📊 나의 감정 통계 보기
+  </button>
+</div>
     </div>
   );
 }
