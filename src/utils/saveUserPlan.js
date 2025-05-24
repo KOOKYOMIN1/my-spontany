@@ -1,9 +1,12 @@
-import { doc, setDoc } from "firebase/firestore";
+// src/utils/saveUserPlan.js
+
+import { collection, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export const saveUserPlan = async (uid, planData) => {
   try {
-    const ref = doc(db, "plans", uid); // 🔥 user.uid를 문서 ID로
+    const planId = Date.now().toString(); // 고유한 timestamp 기반 ID
+    const ref = doc(collection(doc(db, "plans", uid), "entries"), planId);
     await setDoc(ref, planData);
     console.log("✅ Firestore 저장 성공");
   } catch (error) {
