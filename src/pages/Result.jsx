@@ -26,12 +26,11 @@ function Result() {
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
 
-  // 공유 링크 생성
+  // ✅ 공유 링크 생성
   const user = JSON.parse(localStorage.getItem("firebase:authUser"));
   const planId = `${user?.uid}-${Math.floor(Date.now() / 1000)}`;
   const shareUrl = `${window.location.origin}/share/${planId}`;
 
-  // 📸 이미지 가져오기
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
     const randomIndex = Math.floor(Math.random() * 5);
@@ -48,11 +47,10 @@ function Result() {
         setImageUrl(randomImage);
       })
       .catch(() => {
-        setImageUrl("https://images.unsplash.com/photo-1507525428034-b723cf961d3e"); // fallback
+        setImageUrl("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
       });
   }, [selected.city]);
 
-  // 🎨 감성 문장 생성
   useEffect(() => {
     const fetchThemeSentence = async () => {
       const now = Date.now();
@@ -88,7 +86,6 @@ function Result() {
     fetchThemeSentence();
   }, [mood, departure, budget, selected.city]);
 
-  // 📅 GPT 여행 일정 생성
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
@@ -108,11 +105,14 @@ function Result() {
     fetchSchedule();
   }, [mood, selected.city]);
 
-  // 🔗 공유 링크 복사
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePreviewLink = () => {
+    window.open(shareUrl, "_blank");
   };
 
   return (
@@ -155,12 +155,22 @@ function Result() {
         {schedule}
       </div>
 
-      <button
-        onClick={handleCopyLink}
-        className="mt-6 bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
-      >
-        🔗 여행 공유 링크 복사
-      </button>
+      {/* 🔗 공유 버튼 그룹 */}
+      <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+        <button
+          onClick={handleCopyLink}
+          className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
+        >
+          🔗 여행 공유 링크 복사
+        </button>
+        <button
+          onClick={handlePreviewLink}
+          className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
+        >
+          👀 공유 링크 미리 보기
+        </button>
+      </div>
+
       {copied && (
         <p className="mt-2 text-green-500 text-sm">복사 완료! 친구에게 공유해보세요 😊</p>
       )}
