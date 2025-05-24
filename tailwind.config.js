@@ -4,6 +4,18 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'animate-fade-in',
+    'bg-gradient-to-br',
+    'from-pink-50',
+    'to-yellow-50',
+    'border-pink-200',
+    'rounded-2xl',
+    'shadow-md',
+    'hover:shadow-lg',
+    'font-serif',
+    'italic'
+  ],
   theme: {
     extend: {
       animation: {

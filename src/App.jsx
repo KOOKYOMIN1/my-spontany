@@ -8,7 +8,8 @@ import Plan from "./pages/Plan";
 import Result from "./pages/Result";
 import History from "./pages/History";
 import LoginPage from "./pages/LoginPage";
-import Statistics from "./pages/Statistics"; // ✅ 통계 페이지 import 추가
+import Statistics from "./pages/Statistics";
+import Share from "./pages/Share"; // ✅ 공유 페이지 import 추가
 
 function App() {
   const [user, setUser] = useState(undefined); // 처음엔 undefined로 시작
@@ -33,7 +34,8 @@ function App() {
           <Route path="/" element={user ? <Plan /> : <LoginPage />} />
           <Route path="/result" element={<Result />} />
           <Route path="/history" element={user ? <History /> : <LoginPage />} />
-          <Route path="/statistics" element={user ? <Statistics /> : <LoginPage />} /> {/* ✅ 통계 페이지 라우트 추가 */}
+          <Route path="/statistics" element={user ? <Statistics /> : <LoginPage />} />
+          <Route path="/share/:id" element={<Share />} /> {/* ✅ 공유 라우트 추가 */}
         </Routes>
       </div>
     </div>
