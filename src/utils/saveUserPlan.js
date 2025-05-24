@@ -1,14 +1,11 @@
-// src/utils/saveUserPlan.js
-import { collection, addDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
-export const saveUserPlan = async (userId, planData) => {
+export const saveUserPlan = async (uid, planData) => {
   try {
-    await addDoc(collection(db, "plans"), {
-      userId, // ✅ 조회용 필드
-      ...planData,
-    });
-    console.log("✅ Firestore 저장 성공:", planData);
+    const ref = doc(db, "plans", uid); // 🔥 user.uid를 문서 ID로
+    await setDoc(ref, planData);
+    console.log("✅ Firestore 저장 성공");
   } catch (error) {
     console.error("❌ Firestore 저장 실패:", error);
   }
