@@ -1,101 +1,40 @@
-import { useParams } from 'react-router-dom';
+// ✅ 2. /share/:id 공유 페이지 감성화 Share.jsx
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
-export default function Share() {
+function Share() {
   const { id } = useParams();
-  const [plan, setPlan] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [imageUrl, setImageUrl] = useState("");
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    const fetchPlan = async () => {
-      try {
-        const [userId, entryId] = id.split('-');
-        if (!userId || !entryId) throw new Error('잘못된 링크');
-
-        const ref = doc(db, 'plans', userId, 'entries', entryId);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          setPlan(snap.data());
-        }
-      } catch (err) {
-        console.error('공유 페이지 불러오기 실패:', err);
-      } finally {
-        setLoading(false);
-      }
+    const fetchData = async () => {
+      const ref = doc(db, `plans/${id.split('-')[0]}/entries/${id.split('-')[1]}`);
+      const snap = await getDoc(ref);
+      if (snap.exists()) setData(snap.data());
     };
-    fetchPlan();
+    fetchData();
   }, [id]);
 
-  // 📸 Pexels 이미지 불러오기
-  useEffect(() => {
-    if (!plan) return;
-    const city = emotionToCityMap[plan.mood]?.city || "Osaka";
-
-    const randomPage = Math.floor(Math.random() * 10) + 1;
-    const randomIndex = Math.floor(Math.random() * 5);
-
-    fetch(`https://api.pexels.com/v1/search?query=${city}&per_page=5&page=${randomPage}`, {
-      headers: {
-        Authorization: import.meta.env.VITE_PEXELS_API_KEY,
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        const fallback = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
-        const img = data.photos?.[randomIndex]?.src?.large || data.photos?.[0]?.src?.large || fallback;
-        setImageUrl(img);
-      })
-      .catch(() => {
-        setImageUrl("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
-      });
-  }, [plan]);
-
-  const emotionToCityMap = {
-    기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
-    힐링: { city: "Bali", message: "발리의 따뜻한 바람이 당신을 감싸줄 거예요 🌴" },
-    설렘: { city: "Paris", message: "파리의 밤, 에펠탑 아래 당신의 마음이 두근거릴 거예요 💘" },
-  };
-
-  if (loading) return <div className="p-10 text-center text-gray-500">✈️ 여행 계획을 불러오는 중입니다...</div>;
-  if (!plan) return <div className="p-10 text-center text-red-500">❌ 계획을 찾을 수 없습니다.</div>;
-
-  const selected = emotionToCityMap[plan.mood] || {
-    city: "오사카",
-    message: "오사카에서 맛있는 음식과 힐링을 동시에 즐겨보세요 🍜",
-  };
+  if (!data) return <p className="text-center mt-10 text-gray-500">불러오는 중입니다...</p>;
 
   return (
-    <div className="p-8 max-w-2xl mx-auto text-center">
-      <h1 className="text-3xl font-bold text-indigo-600 mb-6">📤 친구의 감성 여행 계획</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-4 py-12">
+      <div className="max-w-md w-full bg-white/90 backdrop-blur-md shadow-xl rounded-2xl p-6 space-y-5">
+        <h1 className="text-2xl font-bold text-center text-gray-800">📬 친구의 여행 추천</h1>
 
-      <div className="bg-white border border-indigo-100 shadow-xl rounded-2xl p-6 space-y-4">
-        <div className="text-left space-y-1">
-          <p><strong>출발지:</strong> {plan.departure}</p>
-          <p><strong>예산:</strong> ₩{plan.budget}</p>
-          <p><strong>감정:</strong> {plan.mood}</p>
-          <p><strong>동행:</strong> {plan.withCompanion ? "동행" : "혼자"}</p>
+        <div className="text-center space-y-1">
+          <p>📍 출발지: {data.departure}</p>
+          <p>💸 예산: ₩{data.budget}</p>
+          <p>🧠 감정: {data.mood}</p>
+          <p>👥 동행: {data.withCompanion ? "동행" : "혼자"}</p>
         </div>
 
-        <hr />
-
-        <div className="text-center space-y-2">
-          <h2 className="text-xl font-bold text-green-700">✨ 추천 여행지: {selected.city}</h2>
-          <p className="text-gray-600 italic">{selected.message}</p>
-
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={selected.city}
-              className="w-full h-64 object-cover rounded-xl shadow-lg mt-4"
-            />
-          )}
-        </div>
+        <p className="text-center text-sm text-gray-400">이 링크는 친구가 공유한 여행 계획이에요 ✨</p>
       </div>
-
-      <p className="mt-10 text-sm text-gray-400">© Spontany 공유 링크 - 나만의 감정 여행을 친구와 함께 ✈️</p>
     </div>
   );
 }
+
+export default Share;

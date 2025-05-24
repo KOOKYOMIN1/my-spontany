@@ -1,3 +1,4 @@
+// ✅ 1. /plan 감성화 Plan.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
@@ -12,7 +13,6 @@ function Plan() {
   const [isWithCompanion, setIsWithCompanion] = useState(false);
 
   const navigate = useNavigate();
-
   const emotions = [
     { label: '기분전환', emoji: '😐' },
     { label: '힐링', emoji: '😴' },
@@ -21,126 +21,61 @@ function Plan() {
 
   const handleSubmit = async () => {
     const user = auth.currentUser;
+    if (!user) return alert("로그인 후 이용해주세요");
 
-    if (!user) {
-      alert("로그인 후 이용해주세요");
-      return;
-    }
-
-    if (!mood) {
-      alert("감정을 선택해주세요 🧠");
-      return;
-    }
-
-    if (!budget || Number(budget) < 1000) {
-      alert("예산은 최소 ₩1,000 이상 입력해야 합니다.");
-      return;
-    }
-
-    const planData = {
-      departure,
-      budget: Number(budget),
-      mood,
-      withCompanion: Boolean(isWithCompanion),
-      timestamp: Date.now(),
-    };
-
-    const entryId = await saveUserPlan(user.uid, planData);
-    const planId = `${user.uid}-${entryId}`;
-
-    const params = new URLSearchParams({
+    const planId = await saveUserPlan(user.uid, {
       departure,
       budget,
       mood,
       withCompanion: isWithCompanion,
+      timestamp: new Date(),
     });
 
-    navigate(`/result?${params.toString()}&planId=${planId}`);
+    navigate(`/result?departure=${departure}&budget=${budget}&mood=${mood}&withCompanion=${isWithCompanion}&planId=${planId}`);
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
-        ✈️ Spontany 여행 계획하기
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-pink-100 flex flex-col items-center justify-center px-4 py-10">
+      <div className="w-full max-w-xl bg-white/90 backdrop-blur rounded-2xl shadow-lg p-8 space-y-6">
+        <h1 className="text-3xl font-bold text-center text-gray-800">✨ 여행 계획하기</h1>
 
-      <LoginButton />
+        <div className="space-y-4">
+          <input type="text" placeholder="출발지 (예: Seoul)"
+            value={departure} onChange={(e) => setDeparture(e.target.value)}
+            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400"
+          />
 
-      {/* 출발지 */}
-      <label className="block mb-2 mt-6">출발지:</label>
-      <input
-        type="text"
-        value={departure}
-        onChange={(e) => setDeparture(e.target.value)}
-        placeholder="예: Seoul"
-        className="border border-gray-300 p-2 rounded w-full mb-4"
-      />
+          <input type="number" placeholder="예산 (예: 500000)"
+            value={budget} onChange={(e) => setBudget(e.target.value)}
+            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400"
+          />
 
-      {/* 예산 */}
-      <label className="block mb-2">예산 (₩):</label>
-      <input
-        type="number"
-        value={budget}
-        onChange={(e) => setBudget(e.target.value)}
-        placeholder="₩ 1000000"
-        className="border border-gray-300 p-2 rounded w-full mb-4"
-      />
+          <div className="space-y-2">
+            <p className="text-gray-700 font-semibold">지금 기분은?</p>
+            <div className="flex gap-3">
+              {emotions.map((e) => (
+                <button key={e.label} onClick={() => setMood(e.label)}
+                  className={`px-4 py-2 rounded-xl border ${mood === e.label ? 'bg-pink-500 text-white' : 'bg-white text-gray-700'} transition shadow`}
+                >{e.emoji} {e.label}</button>
+              ))}
+            </div>
+          </div>
 
-      {/* 감정 */}
-      <label className="block mb-2">감정 선택:</label>
-      <div className="flex gap-3 mb-4">
-        {emotions.map(({ label, emoji }) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => setMood(label)}
-            className={`px-4 py-2 rounded-full border transition-all duration-200 ${
-              mood === label
-                ? 'bg-blue-500 text-white border-blue-500 shadow-md scale-105'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
-            }`}
-          >
-            {emoji} {label}
+          <label className="flex items-center gap-2 text-gray-700">
+            <input type="checkbox" checked={isWithCompanion} onChange={() => setIsWithCompanion(!isWithCompanion)} />
+            친구와 함께 떠날래요!
+          </label>
+
+          <button onClick={handleSubmit}
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-xl shadow-xl transition">
+            ✈️ 여행 추천 받기
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* 동행 여부 버튼 */}
-      <label className="block mt-6 mb-2">동행 여부:</label>
-      <div className="flex gap-3 mb-6">
-        <button
-          type="button"
-          onClick={() => setIsWithCompanion(false)}
-          className={`px-4 py-2 rounded-full border transition-all duration-200 ${
-            !isWithCompanion
-              ? 'bg-blue-500 text-white border-blue-500 shadow-md scale-105'
-              : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
-          }`}
-        >
-          혼자
-        </button>
-        <button
-          type="button"
-          onClick={() => setIsWithCompanion(true)}
-          className={`px-4 py-2 rounded-full border transition-all duration-200 ${
-            isWithCompanion
-              ? 'bg-blue-500 text-white border-blue-500 shadow-md scale-105'
-              : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
-          }`}
-        >
-          동행
-        </button>
-      </div>
+        <div className="pt-6">
+          <LoginButton />
+        </div>
 
-      {/* 버튼 */}
-      <button
-        onClick={handleSubmit}
-        className="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 transition"
-      >
-        ✨ 즉흥 여행 생성하기
-      </button>
-
-      <div className="mt-12">
         <DestinationPhotoViewer />
       </div>
     </div>
