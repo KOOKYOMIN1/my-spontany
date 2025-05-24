@@ -32,6 +32,11 @@ function Plan() {
       return;
     }
 
+    if (!budget || Number(budget) < 1000) {
+      alert("예산은 최소 ₩1,000 이상 입력해야 합니다.");
+      return;
+    }
+
     const planData = {
       departure,
       budget: Number(budget),
