@@ -1,98 +1,83 @@
+import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "./firebase";
-import { Routes, Route, Link } from "react-router-dom"; // ⬅️ Link 추가
 
-import LoginButton from "./components/LoginButton";
-import Plan from "./pages/Plan";
-import Result from "./pages/Result";
-import History from "./pages/History"; // ✅ 히스토리 페이지 import
+function Result() {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const mood = params.get("mood");
+  const departure = params.get("departure");
+  const budget = params.get("budget");
+  const companion = params.get("companion");
 
-function App() {
-  const [user, setUser] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [copied, setCopied] = useState(false); // ✅ 복사 상태
+
+  const emotionToCityMap = {
+    기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
+    힐링: { city: "Bali", message: "발리의 따뜻한 바람이 당신을 감싸줄 거예요 🌴" },
+    설렘: { city: "Paris", message: "파리의 밤, 에펠탑 아래 당신의 마음이 두근거릴 거예요 💘" },
+  };
+
+  const selected = emotionToCityMap[mood] || {
+    city: "오사카",
+    message: "오사카에서 맛있는 음식과 힐링을 동시에 즐겨보세요 🍜",
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser || null);
-      console.log(firebaseUser ? `✅ 로그인 유지됨: ${firebaseUser.email}` : "🚪 로그아웃 상태");
-    });
+    if (selected.city === "오사카") return;
 
-    return () => unsubscribe();
-  }, []);
+    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=1`, {
+      headers: {
+        Authorization: import.meta.env.VITE_PEXELS_API_KEY,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.photos.length > 0) {
+          setImageUrl(data.photos[0].src.large);
+        }
+      });
+  }, [selected.city]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      console.log("👋 로그아웃 성공");
-    } catch (error) {
-      console.error("❌ 로그아웃 실패:", error);
-    }
+  // ✅ 공유 링크 복사
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="App text-center p-8 min-h-screen bg-gradient-to-r from-yellow-50 to-yellow-200">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6">Spontany ✈️</h1>
+    <div className="p-8 max-w-xl mx-auto text-center">
+      <h1 className="text-3xl font-bold text-blue-600 mb-4">✈️ 추천 여행지 결과</h1>
+      <p><strong>출발지:</strong> {departure}</p>
+      <p><strong>예산:</strong> ₩{budget}</p>
+      <p><strong>감정:</strong> {mood}</p>
+      <p><strong>동행:</strong> {companion === "true" ? "동행" : "혼자"}</p>
 
-      {user ? (
-        <>
-          <p className="mb-4">
-            안녕하세요, <strong>{user.displayName}</strong>님
-          </p>
+      <hr className="my-6" />
 
-          {/* ✅ 히스토리 이동 링크 */}
-          <div className="mb-4">
-            <Link
-              to="/history"
-              className="text-indigo-500 hover:underline text-sm"
-            >
-              나의 여행 히스토리 보기
-            </Link>
-          </div>
+      <h2 className="text-xl font-semibold mb-2">🎉 추천 여행지는…</h2>
+      <h3 className="text-lg font-bold text-green-700 mb-2">{selected.city}</h3>
+      <p className="text-gray-700 mb-4">{selected.message}</p>
 
-          <button
-            onClick={handleLogout}
-            className="mb-6 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-          >
-            로그아웃
-          </button>
-
-          <Routes>
-            <Route path="/" element={<Plan />} />
-            <Route path="/result" element={<Result />} />
-            <Route path="/history" element={<History />} /> {/* ✅ 추가 */}
-          </Routes>
-        </>
-      ) : (
-        <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-6">
-          <div
-            style={{
-              width: "100%",
-              height: "160px",
-              overflow: "hidden",
-              borderRadius: "16px",
-              marginBottom: "1rem",
-            }}
-          >
-            <img
-              src="https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg"
-              alt="여행 감성"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-
-          <h1 className="text-2xl font-bold text-blue-500 mb-2">Spontany ✈️</h1>
-          <p className="text-gray-700 mb-4">
-            지금 당신의 감정에 맞춘 여행을 추천해드립니다 ✨
-          </p>
-          <LoginButton />
-        </div>
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={selected.city}
+          className="w-full h-64 object-cover rounded-2xl shadow mb-6"
+        />
       )}
+
+      {/* ✅ 공유 버튼 */}
+      <button
+        onClick={handleCopyLink}
+        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded"
+      >
+        🔗 여행 계획 링크 복사
+      </button>
+      {copied && <p className="mt-2 text-green-500 text-sm">복사 완료! 친구에게 공유해보세요 😎</p>}
     </div>
   );
 }
 
-export default App;
+export default Result;
