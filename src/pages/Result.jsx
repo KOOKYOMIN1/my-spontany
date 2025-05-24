@@ -127,7 +127,7 @@ function Result() {
       {/* 🎨 감성 문장 영역 리디자인 */}
       <div className="relative bg-gradient-to-br from-pink-50 to-yellow-50 border border-pink-200 rounded-2xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
         <p className="text-lg leading-relaxed text-gray-800 font-serif italic whitespace-pre-line animate-fade-in">
-          “{aiMessage}”
+    “{aiMessage}”
         </p>
         <div className="absolute top-0 right-0 p-2">
           <span className="text-pink-400 text-xl animate-pulse">💖</span>
