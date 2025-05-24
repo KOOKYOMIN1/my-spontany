@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { saveUserPlan } from '../utils/saveUserPlan';
+import { generateEmotionMessage } from '../utils/generateEmotionMessage'; // ✨ 추가
 import LoginButton from '../components/LoginButton';
 import DestinationPhotoViewer from '../components/DestinationPhotoViewer';
 
@@ -10,6 +11,7 @@ function Plan() {
   const [budget, setBudget] = useState('');
   const [mood, setMood] = useState('');
   const [isWithCompanion, setIsWithCompanion] = useState(false);
+  const [emotionMessage, setEmotionMessage] = useState(''); // ✨ 감성 문장 상태
 
   const navigate = useNavigate();
 
@@ -52,6 +54,16 @@ function Plan() {
     navigate(`/result?${params.toString()}`);
   };
 
+  // ✨ 감성 문장 생성
+  const handleGenerateMessage = async () => {
+    if (!mood) {
+      alert("먼저 감정을 선택해주세요!");
+      return;
+    }
+    const result = await generateEmotionMessage(mood);
+    setEmotionMessage(result);
+  };
+
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
@@ -90,11 +102,11 @@ function Plan() {
 
       {/* 감정 선택 */}
       <label className="block mb-2">감정 선택:</label>
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 mb-4">
         {emotions.map(({ label, emoji }) => (
           <button
             key={label}
-            type="button" // 중요!
+            type="button"
             onClick={() => setMood(label)}
             className={`px-4 py-2 rounded-full border transition-all duration-200
               ${mood === label
@@ -106,8 +118,21 @@ function Plan() {
         ))}
       </div>
 
+      {/* ✨ 감성 문장 생성 버튼 */}
+      <button
+        onClick={handleGenerateMessage}
+        className="mb-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        💬 감성 문장 생성하기
+      </button>
+
+      {/* 생성된 감성 문장 출력 */}
+      {emotionMessage && (
+        <p className="mt-2 text-indigo-700 italic text-sm">💡 {emotionMessage}</p>
+      )}
+
       {/* 동행 여부 */}
-      <label className="block mb-2">동행 찾기:</label>
+      <label className="block mt-6 mb-2">동행 찾기:</label>
       <label className="flex items-center mb-6">
         <input
           type="checkbox"
@@ -126,7 +151,7 @@ function Plan() {
         ✨ 즉흥 여행 생성하기
       </button>
 
-      {/* 여행지 감성 사진 */}
+      {/* 감성 사진 */}
       <div className="mt-12">
         <DestinationPhotoViewer />
       </div>
