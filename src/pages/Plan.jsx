@@ -45,13 +45,9 @@ function Plan() {
       timestamp: Date.now(),
     };
 
-    // ✅ 저장하고 entryId 받아오기
     const entryId = await saveUserPlan(user.uid, planData);
-
-    // ✅ 공유 링크 구성용 planId
     const planId = `${user.uid}-${entryId}`;
 
-    // ✅ URL 파라미터로도 이동
     const params = new URLSearchParams({
       departure,
       budget,
@@ -59,7 +55,7 @@ function Plan() {
       withCompanion: isWithCompanion,
     });
 
-    navigate(`/result?${params.toString()}&planId=${planId}`); // 결과 페이지로 이동
+    navigate(`/result?${params.toString()}&planId=${planId}`);
   };
 
   return (
@@ -98,8 +94,10 @@ function Plan() {
             key={label}
             type="button"
             onClick={() => setMood(label)}
-            className={`px-4 py-2 rounded-full border ${
-              mood === label ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
+            className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+              mood === label
+                ? 'bg-blue-500 text-white border-blue-500 shadow-md scale-105'
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
             }`}
           >
             {emoji} {label}
@@ -107,22 +105,37 @@ function Plan() {
         ))}
       </div>
 
-      {/* 동행 */}
-      <label className="block mt-6 mb-2">동행 찾기:</label>
-      <label className="flex items-center mb-6">
-        <input
-          type="checkbox"
-          checked={isWithCompanion}
-          onChange={(e) => setIsWithCompanion(e.target.checked)}
-          className="mr-2"
-        />
-        {isWithCompanion ? '동행' : '혼자'}
-      </label>
+      {/* 동행 여부 버튼 */}
+      <label className="block mt-6 mb-2">동행 여부:</label>
+      <div className="flex gap-3 mb-6">
+        <button
+          type="button"
+          onClick={() => setIsWithCompanion(false)}
+          className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+            !isWithCompanion
+              ? 'bg-blue-500 text-white border-blue-500 shadow-md scale-105'
+              : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+          }`}
+        >
+          혼자
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsWithCompanion(true)}
+          className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+            isWithCompanion
+              ? 'bg-blue-500 text-white border-blue-500 shadow-md scale-105'
+              : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+          }`}
+        >
+          동행
+        </button>
+      </div>
 
       {/* 버튼 */}
       <button
         onClick={handleSubmit}
-        className="w-full bg-indigo-500 text-white py-2 px-4 rounded"
+        className="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 transition"
       >
         ✨ 즉흥 여행 생성하기
       </button>
