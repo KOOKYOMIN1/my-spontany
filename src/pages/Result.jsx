@@ -1,4 +1,4 @@
-// ✅ Result.jsx 수정본: 이미지 슬라이더 정상작동을 위해 onAuthStateChanged 적용
+// ✅ Result.jsx 수정본: 이미지 작게 + 슬라이드 + 클릭 시 확대 보기
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -17,6 +17,7 @@ function Result() {
   const [shareUrl, setShareUrl] = useState("");
   const [imageList, setImageList] = useState([]);
   const [imageIndex, setImageIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [aiMessage, setAiMessage] = useState("⏳ 감성 문장을 생성 중입니다...");
   const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
   const [copied, setCopied] = useState(false);
@@ -60,16 +61,13 @@ function Result() {
 
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
-
-    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5&page=${randomPage}`, {
-      headers: {
-        Authorization: import.meta.env.VITE_PEXELS_API_KEY,
-      },
+    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=6&page=${randomPage}`, {
+      headers: { Authorization: import.meta.env.VITE_PEXELS_API_KEY },
     })
       .then(res => res.json())
       .then(data => {
-        const fallbackImage = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
-        const images = data?.photos?.map(p => p.src.large) || [fallbackImage];
+        const fallback = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+        const images = data?.photos?.map(p => p.src.large) || [fallback];
         setImageList(images);
       })
       .catch(() => {
@@ -81,25 +79,17 @@ function Result() {
     const fetchThemeSentence = async () => {
       const now = Date.now();
       const cacheKey = `themeCache:${mood}:${departure}:${budget}`;
-
       const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        setAiMessage(cached);
-        return;
-      }
-
+      if (cached) return setAiMessage(cached);
       if (now - lastRequestTimeRef.current < 10000) return;
       lastRequestTimeRef.current = now;
-
-      const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
 
       try {
         const res = await fetch("/api/generate-theme", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
+          body: JSON.stringify({ prompt: `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.` }),
         });
-
         const data = await res.json();
         const msg = data.message || "여행 테마를 불러오는 데 문제가 발생했어요.";
         setAiMessage(msg);
@@ -108,7 +98,6 @@ function Result() {
         setAiMessage("AI 감성 문장을 불러오는 데 실패했어요.");
       }
     };
-
     fetchThemeSentence();
   }, [mood, departure, budget, selected.city]);
 
@@ -120,14 +109,12 @@ function Result() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mood, destination: selected.city, days: 3 }),
         });
-
         const data = await res.json();
         setSchedule(data.text || "일정을 생성하지 못했습니다.");
       } catch {
         setSchedule("GPT로 여행 일정을 불러오는 데 실패했어요.");
       }
     };
-
     fetchSchedule();
   }, [mood, selected.city]);
 
@@ -143,35 +130,59 @@ function Result() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fdfbfb] to-[#ebedee] flex flex-col items-center py-10 px-4">
-      <div className="max-w-2xl w-full bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-6 space-y-6">
-        <h1 className="text-3xl font-bold text-gray-800 text-center">당신에게 어울리는 여행</h1>
-
+      <div className="max-w-2xl w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 space-y-6">
+        <h1 className="text-3xl font-bold text-center text-gray-800">당신에게 어울리는 여행</h1>
         <div className="text-md text-gray-700 text-center space-y-1">
           <p>📍 출발지: <strong>{departure}</strong></p>
           <p>💸 예산: <strong>₩{budget}</strong></p>
           <p>🧠 감정: <strong>{mood}</strong></p>
           <p>👥 동행: <strong>{withCompanion ? "동행" : "혼자"}</strong></p>
         </div>
-
         <div className="text-center text-green-700 text-xl font-semibold">
           🎉 추천 도시: {selected.city}
         </div>
         <p className="text-center text-gray-600 italic">{selected.message}</p>
 
+        {/* 썸네일 리스트 */}
         {imageList.length > 0 && (
           <>
-            <p className="text-sm text-center text-gray-400">({imageIndex + 1}/{imageList.length})</p>
-            <div className="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
+            <div className="flex gap-2 overflow-x-auto py-2">
+              {imageList.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt={`thumb-${i}`}
+                  className={`h-24 w-36 object-cover rounded-lg cursor-pointer border ${imageIndex === i ? "border-pink-500" : "border-transparent"}`}
+                  onClick={() => setImageIndex(i)}
+                />
+              ))}
+            </div>
+            <div
+              className={`relative cursor-pointer transition duration-300 ${isZoomed ? "scale-[2.5] z-50" : "scale-100"}`}
+              onClick={() => setIsZoomed(!isZoomed)}
+            >
               <img
                 src={imageList[imageIndex]}
-                alt="여행지"
-                className="w-full h-full object-cover transition duration-300"
+                alt="여행지 확대"
+                className="w-full h-52 object-cover rounded-xl shadow-md"
               />
               <div className="absolute top-1/2 left-0 transform -translate-y-1/2 px-2">
-                <button onClick={() => setImageIndex((imageIndex - 1 + imageList.length) % imageList.length)} className="bg-white/70 rounded-full px-2">◀</button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setImageIndex((imageIndex - 1 + imageList.length) % imageList.length);
+                  }}
+                  className="bg-white/70 rounded-full px-2"
+                >◀</button>
               </div>
               <div className="absolute top-1/2 right-0 transform -translate-y-1/2 px-2">
-                <button onClick={() => setImageIndex((imageIndex + 1) % imageList.length)} className="bg-white/70 rounded-full px-2">▶</button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setImageIndex((imageIndex + 1) % imageList.length);
+                  }}
+                  className="bg-white/70 rounded-full px-2"
+                >▶</button>
               </div>
             </div>
           </>
@@ -196,21 +207,15 @@ function Result() {
             <button
               onClick={handleCopyLink}
               className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
-            >
-              🔗 공유 링크 복사
-            </button>
+            >🔗 공유 링크 복사</button>
             <button
               onClick={handlePreviewLink}
               className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
-            >
-              👀 미리 보기
-            </button>
+            >👀 미리 보기</button>
           </div>
         )}
 
-        {copied && (
-          <p className="text-center text-green-500 text-sm">✅ 복사 완료! 친구에게 공유해보세요 😊</p>
-        )}
+        {copied && <p className="text-center text-green-500 text-sm">✅ 복사 완료! 친구에게 공유해보세요 😊</p>}
 
         <FlightSearch originCity={departureCode} destinationCity={destinationCode} />
       </div>
