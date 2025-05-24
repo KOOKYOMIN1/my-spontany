@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import FlightSearch from "../components/FlightSearch"; // 항공권 컴포넌트
+import FlightSearch from "../components/FlightSearch";
 
 function Result() {
   const { search } = useLocation();
@@ -31,10 +31,8 @@ function Result() {
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
 
-  // ✅ 출발지가 없을 때 기본값 지정
   const origin = departure === "미지의 공간" ? "Seoul" : departure;
 
-  // ✅ 도시명 → IATA 코드 매핑
   const cityToIATACode = {
     Seoul: "ICN",
     Paris: "CDG",
@@ -61,7 +59,7 @@ function Result() {
       .then(res => res.json())
       .then(data => {
         const fallbackImage = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
-        const randomImage = data?.photos?.[randomIndex]?.src?.large || data?.photos?.[0]?.src?.large || fallbackImage;
+        const randomImage = data?.photos?.[randomIndex]?.src?.large || fallbackImage;
         setImageUrl(randomImage);
       })
       .catch(() => {
@@ -134,66 +132,63 @@ function Result() {
   };
 
   return (
-    <div className="p-8 max-w-xl mx-auto text-center">
-      <h1 className="text-3xl font-bold text-blue-600 mb-4">✈️ 추천 여행지 결과</h1>
+    <div className="min-h-screen bg-gradient-to-b from-[#fdfbfb] to-[#ebedee] flex flex-col items-center py-10 px-4">
+      <div className="max-w-2xl w-full bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-6 space-y-6">
+        <h1 className="text-3xl font-bold text-gray-800 text-center">당신에게 어울리는 여행</h1>
 
-      <div className="text-left text-gray-700 mb-6 space-y-1">
-        <p><strong>출발지:</strong> {departure}</p>
-        <p><strong>예산:</strong> ₩{budget}</p>
-        <p><strong>감정:</strong> {mood}</p>
-        <p><strong>동행:</strong> {withCompanion ? "동행" : "혼자"}</p>
-      </div>
-
-      <hr className="my-6" />
-
-      <h2 className="text-xl font-semibold mb-2">🎉 추천 여행지는…</h2>
-      <h3 className="text-lg font-bold text-green-700 mb-2">{selected.city}</h3>
-      <p className="text-gray-700 mb-4">{selected.message}</p>
-
-      {imageUrl && (
-        <img
-          src={imageUrl}
-          alt={selected.city}
-          className="w-full h-64 object-cover rounded-2xl shadow-lg mb-6"
-        />
-      )}
-
-      <h2 className="text-xl font-semibold mb-3">💡 AI 감성 한 줄</h2>
-      <div className="relative bg-gradient-to-br from-pink-100 to-yellow-100 border border-pink-200 rounded-2xl shadow-md p-6">
-        <p className="text-lg leading-relaxed text-gray-800 font-serif italic whitespace-pre-line animate-fade-in">
-          “{aiMessage}”
-        </p>
-        <div className="absolute top-0 right-0 p-2">
-          <span className="text-pink-400 text-xl animate-pulse">💖</span>
+        <div className="text-md text-gray-700 text-center space-y-1">
+          <p>📍 출발지: <strong>{departure}</strong></p>
+          <p>💸 예산: <strong>₩{budget}</strong></p>
+          <p>🧠 감정: <strong>{mood}</strong></p>
+          <p>👥 동행: <strong>{withCompanion ? "동행" : "혼자"}</strong></p>
         </div>
+
+        <div className="text-center text-green-700 text-xl font-semibold">
+          🎉 추천 도시: {selected.city}
+        </div>
+        <p className="text-center text-gray-600 italic">{selected.message}</p>
+
+        {imageUrl && (
+          <div className="w-full h-60 overflow-hidden rounded-xl shadow-md">
+            <img src={imageUrl} alt={selected.city} className="w-full h-full object-cover" />
+          </div>
+        )}
+
+        <div className="bg-gradient-to-br from-pink-100 to-yellow-100 border border-pink-200 rounded-2xl shadow-md p-6 relative">
+          <p className="text-lg text-gray-800 font-serif italic whitespace-pre-line text-center">
+            “{aiMessage}”
+          </p>
+          <div className="absolute top-0 right-0 p-2">
+            <span className="text-pink-400 text-xl animate-pulse">💖</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl shadow p-4 whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
+          <h2 className="text-xl font-semibold mb-3">📅 GPT 여행 일정</h2>
+          {schedule}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            onClick={handleCopyLink}
+            className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
+          >
+            🔗 공유 링크 복사
+          </button>
+          <button
+            onClick={handlePreviewLink}
+            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
+          >
+            👀 미리 보기
+          </button>
+        </div>
+
+        {copied && (
+          <p className="text-center text-green-500 text-sm">✅ 복사 완료! 친구에게 공유해보세요 😊</p>
+        )}
+
+        <FlightSearch originCity={departureCode} destinationCity={destinationCode} />
       </div>
-
-      <h2 className="text-xl font-semibold mt-10 mb-3">📅 GPT 여행 일정 추천</h2>
-      <div className="bg-white border border-gray-200 rounded-xl shadow p-4 text-left whitespace-pre-wrap">
-        {schedule}
-      </div>
-
-      <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-        <button
-          onClick={handleCopyLink}
-          className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
-        >
-          🔗 여행 공유 링크 복사
-        </button>
-        <button
-          onClick={handlePreviewLink}
-          className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
-        >
-          👀 공유 링크 미리 보기
-        </button>
-      </div>
-
-      {copied && (
-        <p className="mt-2 text-green-500 text-sm">복사 완료! 친구에게 공유해보세요 😊</p>
-      )}
-
-      {/* ✅ 실제 항공권 검색 */}
-      <FlightSearch originCity={departureCode} destinationCity={destinationCode} />
     </div>
   );
 }
