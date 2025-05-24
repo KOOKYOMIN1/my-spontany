@@ -31,15 +31,15 @@ function App() {
 
       <div className="App text-center px-4 pb-10">
         <Routes>
-          <Route path="/" element={user ? <Plan /> : <LoginPage />} />
+          <Route path="/" element={user ? <Plan /> : <Home />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/result" element={<Result />} />
           <Route path="/history" element={user ? <History /> : <LoginPage />} />
           <Route path="/statistics" element={user ? <Statistics /> : <LoginPage />} />
-          <Route path="/share/:id" element={<Share />} /> {/* ✅ 공유 라우트 추가 */}
+          <Route path="/share/:id" element={<Share />} />
         </Routes>
       </div>
     </div>
   );
 }
-
 export default App;
