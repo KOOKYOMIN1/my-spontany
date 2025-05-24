@@ -1,60 +1,81 @@
-import { useEffect, useState } from "react";
-import { auth } from "../firebase";
-import { getUserPlans } from "../utils/getUserPlans";
-import { deleteUserPlan } from "../utils/deleteUserPlan";
+import { useEffect, useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+import { deleteUserPlan } from '../utils/deleteUserPlan';
 
 function History() {
-  const [plans, setPlans] = useState([]);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPlans = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-      const data = await getUserPlans(user.uid);
-      setPlans(data);
-    };
-    fetchPlans();
-  }, []);
-
-  const handleDelete = async (planId) => {
+  const fetchEntries = async () => {
     const user = auth.currentUser;
     if (!user) return;
-    const confirm = window.confirm("정말 이 여행 기록을 삭제할까요?");
-    if (!confirm) return;
 
-    await deleteUserPlan(user.uid, planId);
-    setPlans((prev) => prev.filter((p) => p.id !== planId));
+    try {
+      const entriesRef = collection(db, 'plans', user.uid, 'entries');
+      const snapshot = await getDocs(entriesRef);
+
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // 최신순 정렬
+      data.sort((a, b) => b.timestamp - a.timestamp);
+
+      setEntries(data);
+    } catch (error) {
+      console.error('❌ 여행 기록 불러오기 실패:', error.message || error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleDelete = async (entryId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const confirm = window.confirm('정말 삭제하시겠습니까?');
+    if (!confirm) return;
+
+    try {
+      await deleteUserPlan(user.uid, entryId);
+      setEntries(entries.filter(e => e.id !== entryId));
+    } catch (error) {
+      alert('삭제에 실패했습니다.');
+    }
+  };
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
   return (
-    <div className="p-8 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
-        📚 나의 여행 히스토리
-      </h1>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6 text-center">📂 나의 여행 히스토리</h1>
 
-      {plans.length === 0 ? (
-        <p className="text-gray-500 text-center">여행 기록이 없습니다.</p>
+      {loading ? (
+        <p>불러오는 중...</p>
+      ) : entries.length === 0 ? (
+        <p>저장된 여행 기록이 없습니다.</p>
       ) : (
-        <div className="grid gap-6">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className="bg-white shadow-md rounded-xl p-6 relative"
-            >
-              <button
-                onClick={() => handleDelete(plan.id)}
-                className="absolute top-3 right-3 text-red-500 hover:text-red-700 text-sm"
-              >
-                🗑️ 삭제
-              </button>
-
-              <p><strong>출발지:</strong> {plan.departure}</p>
-              <p><strong>예산:</strong> ₩{plan.budget.toLocaleString()}</p>
-              <p><strong>감정:</strong> {plan.mood}</p>
-              <p><strong>동행:</strong> {plan.withCompanion ? "동행" : "혼자"}</p>
-              <p className="text-sm text-gray-400 mt-2">
-                생성일: {new Date(plan.timestamp).toLocaleString()}
+        <div className="grid gap-4">
+          {entries.map((entry) => (
+            <div key={entry.id} className="bg-white shadow-md rounded-xl p-4 text-left relative">
+              <p className="text-sm text-gray-500">
+                🕒 {new Date(entry.timestamp).toLocaleString()}
               </p>
+              <p className="mt-2"><strong>감정:</strong> {entry.mood}</p>
+              <p><strong>출발지:</strong> {entry.departure}</p>
+              <p><strong>예산:</strong> ₩{entry.budget.toLocaleString()}</p>
+              <p><strong>동행:</strong> {entry.withCompanion ? '동행 있음' : '혼자 여행'}</p>
+
+              <button
+                onClick={() => handleDelete(entry.id)}
+                className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm"
+              >
+                🗑 삭제
+              </button>
             </div>
           ))}
         </div>

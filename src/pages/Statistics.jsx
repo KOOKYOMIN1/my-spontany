@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import MoodChart from '../components/MoodChart';
+import { useEffect, useState } from 'react';
 
 function Statistics() {
   const [moodCounts, setMoodCounts] = useState({});
@@ -13,11 +13,9 @@ function Statistics() {
       if (!user) return;
 
       try {
-        const q = query(
-          collection(db, 'plans'),
-          where('userId', '==', user.uid)
-        );
-        const snapshot = await getDocs(q);
+        // ✅ 유저 UID로 정확한 경로 지정
+        const entriesRef = collection(db, 'plans', user.uid, 'entries');
+        const snapshot = await getDocs(entriesRef);
 
         const moodFrequency = {};
         snapshot.forEach(doc => {
@@ -29,7 +27,7 @@ function Statistics() {
 
         setMoodCounts(moodFrequency);
       } catch (error) {
-        console.error('감정 통계 불러오기 실패:', error);
+        console.error('❌ 감정 통계 불러오기 실패:', error);
       } finally {
         setLoading(false);
       }
