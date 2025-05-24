@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import FlightSearch from "../components/FlightSearch"; // ✅ 반드시 상단에 import
+import FlightSearch from "../components/FlightSearch"; // 항공권 컴포넌트
 
 function Result() {
   const { search } = useLocation();
@@ -31,8 +31,23 @@ function Result() {
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
 
-  // ✅ 404 방지용 출발지 기본값
+  // ✅ 출발지가 없을 때 기본값 지정
   const origin = departure === "미지의 공간" ? "Seoul" : departure;
+
+  // ✅ 도시명 → IATA 코드 매핑
+  const cityToIATACode = {
+    Seoul: "ICN",
+    Paris: "CDG",
+    Bangkok: "BKK",
+    Bali: "DPS",
+    Osaka: "KIX",
+    Tokyo: "NRT",
+    NewYork: "JFK",
+    London: "LHR",
+  };
+
+  const departureCode = cityToIATACode[origin] || "ICN";
+  const destinationCode = cityToIATACode[selected.city] || "ICN";
 
   useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
@@ -177,8 +192,8 @@ function Result() {
         <p className="mt-2 text-green-500 text-sm">복사 완료! 친구에게 공유해보세요 😊</p>
       )}
 
-      {/* ✅ 항공권 검색 연동 */}
-      <FlightSearch originCity={origin} destinationCity={selected.city} />
+      {/* ✅ 실제 항공권 검색 */}
+      <FlightSearch originCity={departureCode} destinationCity={destinationCode} />
     </div>
   );
 }
