@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Configuration, OpenAIApi } from "openai";
 
 function Result() {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
-  const mood = params.get("mood");
   const departure = params.get("departure");
   const budget = params.get("budget");
+  const mood = params.get("mood");
   const companion = params.get("companion");
 
   const emotionToCityMap = {
@@ -25,6 +24,7 @@ function Result() {
   const [aiMessage, setAiMessage] = useState("문장을 생성 중입니다...");
   const [copied, setCopied] = useState(false);
 
+  // 📸 도시 이미지 가져오기
   useEffect(() => {
     if (selected.city !== "오사카") {
       fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=1`, {
@@ -41,24 +41,29 @@ function Result() {
     }
   }, [selected.city]);
 
+  // 💡 감성 문장 생성 (fetch 방식)
   useEffect(() => {
     const fetchThemeSentence = async () => {
-      const configuration = new Configuration({
-        apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-      });
-      const openai = new OpenAIApi(configuration);
-
       try {
         const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
 
-        const response = await openai.createChatCompletion({
-          model: "gpt-4",
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 60,
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 60,
+            temperature: 0.8,
+          }),
         });
 
-        const message = response.data.choices[0].message.content.trim();
-        setAiMessage(message);
+        const data = await response.json();
+        const message = data.choices?.[0]?.message?.content?.trim();
+        setAiMessage(message || "여행 테마를 불러오는 데 문제가 발생했어요.");
       } catch (error) {
         console.error("❌ 감성 문장 생성 실패:", error);
         setAiMessage("여행 테마를 불러오는 데 실패했어요.");
