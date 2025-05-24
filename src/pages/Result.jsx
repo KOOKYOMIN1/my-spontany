@@ -1,3 +1,4 @@
+// ✅ Result.jsx 수정본: 사진 크기 축소 + 여러 장 슬라이드 형태로 보기
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { auth } from "../firebase";
@@ -10,16 +11,18 @@ function Result() {
   const budget = params.get("budget") || "알 수 없음";
   const mood = params.get("mood") || "기분전환";
   const withCompanion = params.get("withCompanion") === "true";
-  const entryId = params.get("planId"); // 수정된 변수명 (entryId)
+  const entryId = params.get("planId");
   const user = auth.currentUser;
 
   const [shareUrl, setShareUrl] = useState("");
+  const [imageList, setImageList] = useState([]);
+  const [imageIndex, setImageIndex] = useState(0);
+  const [aiMessage, setAiMessage] = useState("⏳ 감성 문장을 생성 중입니다...");
+  const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
+  const [copied, setCopied] = useState(false);
+  const lastRequestTimeRef = useRef(0);
 
-  useEffect(() => {
-    if (user && entryId) {
-      setShareUrl(`${window.location.origin}/share/${user.uid}-${entryId}`);
-    }
-  }, [user, entryId]);
+  const origin = departure === "미지의 공간" ? "Seoul" : departure;
 
   const emotionToCityMap = {
     기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
@@ -31,14 +34,6 @@ function Result() {
     city: "오사카",
     message: "오사카에서 맛있는 음식과 힐링을 동시에 즐겨보세요 🍜",
   };
-
-  const [imageUrl, setImageUrl] = useState("");
-  const [aiMessage, setAiMessage] = useState("⏳ 감성 문장을 생성 중입니다...");
-  const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
-  const [copied, setCopied] = useState(false);
-  const lastRequestTimeRef = useRef(0);
-
-  const origin = departure === "미지의 공간" ? "Seoul" : departure;
 
   const cityToIATACode = {
     Seoul: "ICN",
@@ -55,8 +50,13 @@ function Result() {
   const destinationCode = cityToIATACode[selected.city] || "ICN";
 
   useEffect(() => {
+    if (user && entryId) {
+      setShareUrl(`${window.location.origin}/share/${user.uid}-${entryId}`);
+    }
+  }, [user, entryId]);
+
+  useEffect(() => {
     const randomPage = Math.floor(Math.random() * 10) + 1;
-    const randomIndex = Math.floor(Math.random() * 5);
 
     fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5&page=${randomPage}`, {
       headers: {
@@ -66,11 +66,11 @@ function Result() {
       .then(res => res.json())
       .then(data => {
         const fallbackImage = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
-        const randomImage = data?.photos?.[randomIndex]?.src?.large || fallbackImage;
-        setImageUrl(randomImage);
+        const images = data?.photos?.map(p => p.src.large) || [fallbackImage];
+        setImageList(images);
       })
       .catch(() => {
-        setImageUrl("https://images.unsplash.com/photo-1507525428034-b723cf961d3e");
+        setImageList(["https://images.unsplash.com/photo-1507525428034-b723cf961d3e"]);
       });
   }, [selected.city]);
 
@@ -155,9 +155,15 @@ function Result() {
         </div>
         <p className="text-center text-gray-600 italic">{selected.message}</p>
 
-        {imageUrl && (
-          <div className="w-full h-60 overflow-hidden rounded-xl shadow-md">
-            <img src={imageUrl} alt={selected.city} className="w-full h-full object-cover" />
+        {imageList.length > 0 && (
+          <div className="w-full h-48 overflow-hidden rounded-xl shadow-md relative">
+            <img src={imageList[imageIndex]} alt="여행지" className="w-full h-full object-cover transition" />
+            <div className="absolute top-1/2 left-0 transform -translate-y-1/2 px-2">
+              <button onClick={() => setImageIndex((imageIndex - 1 + imageList.length) % imageList.length)} className="bg-white/70 rounded-full px-2">◀</button>
+            </div>
+            <div className="absolute top-1/2 right-0 transform -translate-y-1/2 px-2">
+              <button onClick={() => setImageIndex((imageIndex + 1) % imageList.length)} className="bg-white/70 rounded-full px-2">▶</button>
+            </div>
           </div>
         )}
 
