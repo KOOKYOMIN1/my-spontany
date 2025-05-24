@@ -4,10 +4,10 @@ import { useLocation } from "react-router-dom";
 function Result() {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
-  const departure = params.get("departure");
-  const budget = params.get("budget");
-  const mood = params.get("mood");
-  const companion = params.get("companion");
+  const departure = params.get("departure") || "미지의 공간";
+  const budget = params.get("budget") || "알 수 없음";
+  const mood = params.get("mood") || "기분전환";
+  const withCompanion = params.get("withCompanion") === "true";
 
   const emotionToCityMap = {
     기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
@@ -26,27 +26,24 @@ function Result() {
   const lastRequestTimeRef = useRef(0);
 
   useEffect(() => {
-    if (selected.city !== "오사카") {
-      const randomPage = Math.floor(Math.random() * 10) + 1;
-      const randomIndex = Math.floor(Math.random() * 5);
+    const randomPage = Math.floor(Math.random() * 10) + 1;
+    const randomIndex = Math.floor(Math.random() * 5);
 
-      fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5&page=${randomPage}`, {
-        headers: {
-          Authorization: import.meta.env.VITE_PEXELS_API_KEY,
-        },
+    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5&page=${randomPage}`, {
+      headers: {
+        Authorization: import.meta.env.VITE_PEXELS_API_KEY,
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        const randomImage = data?.photos?.[randomIndex]?.src?.large || data?.photos?.[0]?.src?.large;
+        if (randomImage) {
+          setImageUrl(randomImage);
+        }
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.photos.length > 0) {
-            const randomImage = data.photos[randomIndex]?.src?.large || data.photos[0].src.large;
-            setImageUrl(randomImage);
-            console.log("📸 랜덤 이미지:", randomImage);
-          }
-        })
-        .catch(err => {
-          console.error("❌ Pexels 이미지 불러오기 실패:", err);
-        });
-    }
+      .catch(err => {
+        console.error("❌ 이미지 불러오기 실패:", err);
+      });
   }, [selected.city]);
 
   useEffect(() => {
@@ -56,16 +53,11 @@ function Result() {
 
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
-        console.log("♻️ 캐시된 문장 사용:", cached);
         setAiMessage(cached);
         return;
       }
 
-      if (now - lastRequestTimeRef.current < 10000) {
-        console.log("⏳ 쿨타임 중 - 요청 차단");
-        return;
-      }
-
+      if (now - lastRequestTimeRef.current < 10000) return;
       lastRequestTimeRef.current = now;
 
       const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
@@ -73,21 +65,17 @@ function Result() {
       try {
         const res = await fetch("/api/generate-theme", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt }),
         });
 
         const data = await res.json();
-        console.log("🌈 GPT 응답:", data);
-
         const msg = data.message || "여행 테마를 불러오는 데 문제가 발생했어요.";
         setAiMessage(msg);
         localStorage.setItem(cacheKey, msg);
-      } catch (error) {
-        console.error("❌ GPT 프록시 호출 실패:", error);
-        setAiMessage("여행 테마를 불러오는 데 실패했어요.");
+      } catch (err) {
+        console.error("❌ GPT 호출 실패:", err);
+        setAiMessage("AI 감성 문장을 불러오는 데 실패했어요.");
       }
     };
 
@@ -103,10 +91,13 @@ function Result() {
   return (
     <div className="p-8 max-w-xl mx-auto text-center">
       <h1 className="text-3xl font-bold text-blue-600 mb-4">✈️ 추천 여행지 결과</h1>
-      <p><strong>출발지:</strong> {departure}</p>
-      <p><strong>예산:</strong> ₩{budget}</p>
-      <p><strong>감정:</strong> {mood}</p>
-      <p><strong>동행:</strong> {companion === "true" ? "동행" : "혼자"}</p>
+
+      <div className="text-left text-gray-700 mb-6 space-y-1">
+        <p><strong>출발지:</strong> {departure}</p>
+        <p><strong>예산:</strong> ₩{budget}</p>
+        <p><strong>감정:</strong> {mood}</p>
+        <p><strong>동행:</strong> {withCompanion ? "동행" : "혼자"}</p>
+      </div>
 
       <hr className="my-6" />
 
@@ -118,16 +109,14 @@ function Result() {
         <img
           src={imageUrl}
           alt={selected.city}
-          className="w-full h-64 object-cover rounded-2xl shadow mb-6"
+          className="w-full h-64 object-cover rounded-2xl shadow-lg mb-6"
         />
       )}
 
       <h2 className="text-xl font-semibold mb-3">💡 AI 감성 한 줄</h2>
-
-      {/* 🎨 감성 문장 영역 리디자인 */}
-      <div className="relative bg-gradient-to-br from-pink-50 to-yellow-50 border border-pink-200 rounded-2xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
+      <div className="relative bg-gradient-to-br from-pink-100 to-yellow-100 border border-pink-200 rounded-2xl shadow-md p-6">
         <p className="text-lg leading-relaxed text-gray-800 font-serif italic whitespace-pre-line animate-fade-in">
-    “{aiMessage}”
+          “{aiMessage}”
         </p>
         <div className="absolute top-0 right-0 p-2">
           <span className="text-pink-400 text-xl animate-pulse">💖</span>
@@ -136,14 +125,12 @@ function Result() {
 
       <button
         onClick={handleCopyLink}
-        className="mt-6 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded"
+        className="mt-6 bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
       >
         🔗 여행 계획 링크 복사
       </button>
       {copied && (
-        <p className="mt-2 text-green-500 text-sm">
-          복사 완료! 친구에게 공유해보세요 😎
-        </p>
+        <p className="mt-2 text-green-500 text-sm">링크 복사 완료! 친구에게 공유해보세요 😊</p>
       )}
     </div>
   );
