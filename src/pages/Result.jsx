@@ -23,9 +23,9 @@ function Result() {
   const [imageUrl, setImageUrl] = useState("");
   const [aiMessage, setAiMessage] = useState("문장을 생성 중입니다...");
   const [copied, setCopied] = useState(false);
-  const lastRequestTimeRef = useRef(0); // 쿨타임용
+  const lastRequestTimeRef = useRef(0); // 쿨타임 추적
 
-  // 📸 도시 이미지
+  // 📸 도시 이미지 가져오기
   useEffect(() => {
     if (selected.city !== "오사카") {
       fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=1`, {
@@ -42,14 +42,26 @@ function Result() {
     }
   }, [selected.city]);
 
-  // 💡 프록시 서버로 감성 문장 요청
+  // 💡 감성 문장 요청 (프록시 + 쿨타임 + 캐시)
   useEffect(() => {
     const fetchThemeSentence = async () => {
       const now = Date.now();
+
+      // ⏱ 쿨타임 10초
       if (now - lastRequestTimeRef.current < 10000) {
         console.log("⏳ 쿨타임 중 – 중복 요청 차단");
         return;
       }
+
+      // 캐시 확인
+      const cacheKey = `themeCache:${mood}:${departure}:${budget}`;
+      const cachedMessage = localStorage.getItem(cacheKey);
+      if (cachedMessage) {
+        console.log("♻️ 캐시된 감성 문장 사용:", cachedMessage);
+        setAiMessage(cachedMessage);
+        return;
+      }
+
       lastRequestTimeRef.current = now;
 
       const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
@@ -64,7 +76,11 @@ function Result() {
         });
 
         const data = await response.json();
-        setAiMessage(data.message || "여행 테마를 불러오는 데 문제가 발생했어요.");
+        const message = data.message || "여행 테마를 불러오는 데 문제가 발생했어요.";
+        setAiMessage(message);
+
+        // 캐시에 저장
+        localStorage.setItem(cacheKey, message);
       } catch (error) {
         console.error("❌ 감성 문장 프록시 호출 실패:", error);
         setAiMessage("여행 테마를 불러오는 데 실패했어요.");
