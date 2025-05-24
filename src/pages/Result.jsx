@@ -28,8 +28,10 @@ function Result() {
   // 📸 도시 이미지 가져오기
   useEffect(() => {
   if (selected.city !== "오사카") {
-    const random = Math.floor(Math.random() * 5); // 0~4
-    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5`, {
+    const randomPage = Math.floor(Math.random() * 10) + 1; // 1~10페이지 중 랜덤
+    const randomIndex = Math.floor(Math.random() * 5); // 0~4
+
+    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5&page=${randomPage}`, {
       headers: {
         Authorization: import.meta.env.VITE_PEXELS_API_KEY,
       },
@@ -37,9 +39,9 @@ function Result() {
       .then((res) => res.json())
       .then((data) => {
         if (data.photos.length > 0) {
-          const randomImage = data.photos[random]?.src?.large || data.photos[0].src.large;
+          const randomImage = data.photos[randomIndex]?.src?.large || data.photos[0].src.large;
           setImageUrl(randomImage);
-          console.log("📸 랜덤 이미지 적용:", randomImage);
+          console.log("📸 랜덤 이미지 (page", randomPage, "):", randomImage);
         }
       })
       .catch((err) => {
