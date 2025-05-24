@@ -1,58 +1,15 @@
-/* 기존 스타일 유지 */
+/* 🌅 부드러운 감성 배경 */
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
   font-family: 'Noto Sans KR', sans-serif;
-  background: linear-gradient(to right, #fefcea, #f1da36); /* 부드러운 감성 배경 */
+  background: linear-gradient(to right, #fefcea, #f1da36);
   min-height: 100vh;
 }
 
-/* 로고 효과 */
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-/* 로고 스핀 */
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-/* 카드 스타일 */
-.card {
-  padding: 2em;
-  background: white;
-  border-radius: 24px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  margin-top: 2rem;
-}
-
-/* 문서 링크 색상 */
-.read-the-docs {
-  color: #888;
-}
-
-/* ✨ 감성 로그인 박스 */
+/* ✨ 감성 로그인 카드 */
 .login-card {
   max-width: 400px;
   margin: 4rem auto;
@@ -88,4 +45,63 @@
   width: 100%;
   border-radius: 16px;
   margin-bottom: 20px;
+}
+
+/* 📄 카드 스타일 */
+.card {
+  padding: 2em;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  margin-top: 2rem;
+}
+
+/* 📚 문서 링크 */
+.read-the-docs {
+  color: #888;
+}
+
+/* 🚀 로고 스타일 */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+/* 🎡 로고 회전 */
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+/* 💫 감성 문장 등장 애니메이션 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.9s ease-out;
 }

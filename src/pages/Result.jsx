@@ -25,7 +25,6 @@ function Result() {
   const [copied, setCopied] = useState(false);
   const lastRequestTimeRef = useRef(0);
 
-  // 📸 Pexels 이미지 불러오기
   useEffect(() => {
     if (selected.city !== "오사카") {
       const randomPage = Math.floor(Math.random() * 10) + 1;
@@ -50,13 +49,11 @@ function Result() {
     }
   }, [selected.city]);
 
-  // 💬 GPT 감성 문장 생성
   useEffect(() => {
     const fetchThemeSentence = async () => {
       const now = Date.now();
       const cacheKey = `themeCache:${mood}:${departure}:${budget}`;
 
-      // 캐시 사용
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         console.log("♻️ 캐시된 문장 사용:", cached);
@@ -64,7 +61,6 @@ function Result() {
         return;
       }
 
-      // 쿨타임 체크
       if (now - lastRequestTimeRef.current < 10000) {
         console.log("⏳ 쿨타임 중 - 요청 차단");
         return;
@@ -126,12 +122,21 @@ function Result() {
         />
       )}
 
-      <h2 className="text-xl font-semibold mb-2">💡 AI 감성 한 줄</h2>
-      <p className="text-lg text-gray-800 italic mb-6 whitespace-pre-line">{aiMessage}</p>
+      <h2 className="text-xl font-semibold mb-3">💡 AI 감성 한 줄</h2>
+
+      {/* 🎨 감성 문장 영역 리디자인 */}
+      <div className="relative bg-gradient-to-br from-pink-50 to-yellow-50 border border-pink-200 rounded-2xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
+        <p className="text-lg leading-relaxed text-gray-800 font-serif italic whitespace-pre-line animate-fade-in">
+          “{aiMessage}”
+        </p>
+        <div className="absolute top-0 right-0 p-2">
+          <span className="text-pink-400 text-xl animate-pulse">💖</span>
+        </div>
+      </div>
 
       <button
         onClick={handleCopyLink}
-        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded"
+        className="mt-6 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded"
       >
         🔗 여행 계획 링크 복사
       </button>
