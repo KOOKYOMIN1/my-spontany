@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { auth } from "../firebase";
 import FlightSearch from "../components/FlightSearch";
 
 function Result() {
@@ -9,10 +10,16 @@ function Result() {
   const budget = params.get("budget") || "알 수 없음";
   const mood = params.get("mood") || "기분전환";
   const withCompanion = params.get("withCompanion") === "true";
-  const planId = params.get("planId");
-  const shareUrl = planId
-    ? `${window.location.origin}/share/${planId}`
-    : `${window.location.origin}`;
+  const entryId = params.get("planId"); // 수정된 변수명 (entryId)
+  const user = auth.currentUser;
+
+  const [shareUrl, setShareUrl] = useState("");
+
+  useEffect(() => {
+    if (user && entryId) {
+      setShareUrl(`${window.location.origin}/share/${user.uid}-${entryId}`);
+    }
+  }, [user, entryId]);
 
   const emotionToCityMap = {
     기분전환: { city: "Bangkok", message: "바쁜 일상 속, 방콕에서 활력을 찾아보세요 🌇" },
@@ -168,20 +175,22 @@ function Result() {
           {schedule}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={handleCopyLink}
-            className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
-          >
-            🔗 공유 링크 복사
-          </button>
-          <button
-            onClick={handlePreviewLink}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
-          >
-            👀 미리 보기
-          </button>
-        </div>
+        {shareUrl && (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={handleCopyLink}
+              className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
+            >
+              🔗 공유 링크 복사
+            </button>
+            <button
+              onClick={handlePreviewLink}
+              className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full shadow transition"
+            >
+              👀 미리 보기
+            </button>
+          </div>
+        )}
 
         {copied && (
           <p className="text-center text-green-500 text-sm">✅ 복사 완료! 친구에게 공유해보세요 😊</p>
