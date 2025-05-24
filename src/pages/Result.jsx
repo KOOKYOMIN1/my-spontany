@@ -44,6 +44,8 @@ function Result() {
   // 💡 감성 문장 생성 (fetch 방식)
   useEffect(() => {
     const fetchThemeSentence = async () => {
+    console.log("✅ OpenAI 키:", import.meta.env.VITE_OPENAI_API_KEY);
+
       try {
         const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
 
