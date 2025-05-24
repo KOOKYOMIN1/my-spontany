@@ -27,20 +27,26 @@ function Result() {
 
   // 📸 도시 이미지 가져오기
   useEffect(() => {
-    if (selected.city !== "오사카") {
-      fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=1`, {
-        headers: {
-          Authorization: import.meta.env.VITE_PEXELS_API_KEY,
-        },
+  if (selected.city !== "오사카") {
+    const random = Math.floor(Math.random() * 5); // 0~4
+    fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5`, {
+      headers: {
+        Authorization: import.meta.env.VITE_PEXELS_API_KEY,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.photos.length > 0) {
+          const randomImage = data.photos[random]?.src?.large || data.photos[0].src.large;
+          setImageUrl(randomImage);
+          console.log("📸 랜덤 이미지 적용:", randomImage);
+        }
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.photos.length > 0) {
-            setImageUrl(data.photos[0].src.large);
-          }
-        });
-    }
-  }, [selected.city]);
+      .catch((err) => {
+        console.error("❌ Pexels 이미지 불러오기 실패:", err);
+      });
+  }
+}, [selected.city]);
 
   // 💡 감성 문장 요청 (프록시 + 쿨타임 + 캐시)
   useEffect(() => {
