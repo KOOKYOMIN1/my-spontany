@@ -10,6 +10,7 @@ import History from "./pages/History";
 import LoginPage from "./pages/LoginPage";
 import Statistics from "./pages/Statistics";
 import Share from "./pages/Share"; // ✅ 공유 페이지 import 추가
+import Home from "./pages/Home";
 
 function App() {
   const [user, setUser] = useState(undefined); // 처음엔 undefined로 시작
