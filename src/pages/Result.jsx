@@ -41,10 +41,10 @@ function Result() {
     }
   }, [selected.city]);
 
-  // 💡 감성 문장 생성 (fetch 방식)
+  // 💡 GPT-4o 감성 문장 생성
   useEffect(() => {
     const fetchThemeSentence = async () => {
-    console.log("✅ OpenAI 키:", import.meta.env.VITE_OPENAI_API_KEY);
+      console.log("✅ OpenAI 키:", import.meta.env.VITE_OPENAI_API_KEY);
 
       try {
         const prompt = `감정: ${mood}, 출발지: ${departure}, 예산: ${budget}, 여행지: ${selected.city}에 어울리는 감성적인 한 문장의 여행 테마를 만들어줘.`;
@@ -56,7 +56,7 @@ function Result() {
             Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o", // ← 여기 GPT-4o로 변경됨
             messages: [{ role: "user", content: prompt }],
             max_tokens: 60,
             temperature: 0.8,
