@@ -1,10 +1,27 @@
-import { signOut } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 import { auth } from "../firebase";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Header({ user }) {
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      navigate("/"); // 로그인 후 홈으로 이동
+    } catch (error) {
+      console.error("로그인 실패:", error);
+    }
+  };
+
   const handleLogout = async () => {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+      navigate("/"); // 로그아웃 후 홈으로 이동
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
   };
 
   return (
@@ -17,8 +34,8 @@ function Header({ user }) {
         display: "flex",
         alignItems: "center",
         gap: "12px",
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        padding: "6px 10px",
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
+        padding: "6px 12px",
         borderRadius: "8px",
       }}
     >
@@ -31,27 +48,30 @@ function Header({ user }) {
             onClick={handleLogout}
             style={{
               fontSize: "14px",
-              color: "#555",
+              textDecoration: "underline",
               background: "none",
               border: "none",
-              textDecoration: "underline",
               cursor: "pointer",
+              color: "#444",
             }}
           >
             로그아웃
           </button>
         </>
       ) : (
-        <Link
-          to="/login"
+        <button
+          onClick={handleLogin}
           style={{
             fontSize: "14px",
-            color: "#555",
             textDecoration: "underline",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "#444",
           }}
         >
           로그인
-        </Link>
+        </button>
       )}
     </div>
   );
