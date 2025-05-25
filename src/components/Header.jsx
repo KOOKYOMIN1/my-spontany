@@ -15,7 +15,7 @@ function Header({ user }) {
   return (
     <header className="w-full bg-white shadow p-4 flex justify-between items-center mb-6">
       <Link to="/" className="text-xl font-bold text-blue-600">
-        Spontany ✈️
+        Spontany 
       </Link>
 
       {user ? (
@@ -24,7 +24,7 @@ function Header({ user }) {
             to="/history"
             className="text-sm text-indigo-600 hover:underline"
           >
-            📜 나의 히스토리
+             나의 히스토리
           </Link>
 
           <span className="text-sm text-gray-600">
