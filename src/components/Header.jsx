@@ -8,8 +8,8 @@ function Header({ user }) {
   };
 
   return (
-    <header>
-      {/* 오른쪽 상단에 고정된 로그인/로그아웃 버튼 */}
+    <>
+      {/* 고정된 우측 상단 로그인/로그아웃 */}
       <div className="fixed top-4 right-4 z-50">
         {user ? (
           <div className="flex items-center space-x-2">
@@ -32,7 +32,7 @@ function Header({ user }) {
           </Link>
         )}
       </div>
-    </header>
+    </>
   );
 }
 
