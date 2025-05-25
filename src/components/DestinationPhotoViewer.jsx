@@ -35,7 +35,7 @@ export default function DestinationPhotoViewer() {
         const photos = data.photos.map((photo) => photo.src.landscape);
         setImages(photos);
       } catch (error) {
-        console.error("❌ 이미지 불러오기 실패:", error);
+        console.error("이미지 불러오기 실패:", error);
       } finally {
         setLoading(false);
       }
@@ -46,7 +46,7 @@ export default function DestinationPhotoViewer() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-4">🖼️ 여행지 사진 미리보기</h2>
+      <h2 className="text-2xl font-bold text-center mb-4"> 여행지 사진 미리보기</h2>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
         <select
