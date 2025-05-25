@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 import Header from "./components/Header";
 import Result from "./pages/Result";
@@ -13,13 +13,20 @@ import Home from "./pages/Home";
 
 function App() {
   const [user, setUser] = useState(undefined);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser || null);
+
+      // 로그인 완료 시 자동으로 Home으로 이동
+      if (firebaseUser) {
+        navigate("/");
+      }
     });
+
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   if (user === undefined) {
     return <div className="text-center p-8">로딩 중...</div>;
