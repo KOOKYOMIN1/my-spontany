@@ -8,7 +8,7 @@ function LoginButton() {
     try {
       await signInWithPopup(auth, provider);
     } catch (err) {
-      alert("로그인에 실패했어요 🙁");
+      alert("로그인에 실패했어요");
     }
   };
 
@@ -18,7 +18,7 @@ function LoginButton() {
         onClick={handleLogin}
         className="bg-white border border-gray-300 hover:border-gray-500 text-gray-700 font-semibold py-2 px-5 rounded-full shadow-sm hover:shadow-md transition"
       >
-        🟢 Google로 로그인
+          Google로 로그인
       </button>
     </div>
   );

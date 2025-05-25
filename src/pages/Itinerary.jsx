@@ -27,7 +27,7 @@ export default function Itinerary({ mood = '힐링', destination = '강릉', day
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-4">
-      <h1 className="text-xl font-bold">🎒 GPT 추천 일정</h1>
+      <h1 className="text-xl font-bold"> GPT 추천 일정</h1>
       {loading ? (
         <p>일정을 생성 중입니다...</p>
       ) : (

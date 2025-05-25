@@ -22,16 +22,16 @@ function Share() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full bg-white/90 backdrop-blur-md shadow-xl rounded-2xl p-6 space-y-5">
-        <h1 className="text-2xl font-bold text-center text-gray-800">📬 친구의 여행 추천</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-800"> 친구의 여행 추천</h1>
 
         <div className="text-center space-y-1">
-          <p>📍 출발지: {data.departure}</p>
-          <p>💸 예산: ₩{data.budget}</p>
-          <p>🧠 감정: {data.mood}</p>
-          <p>👥 동행: {data.withCompanion ? "동행" : "혼자"}</p>
+          <p>  출발지: {data.departure}</p>
+          <p>  예산: ₩{data.budget}</p>
+          <p>  감정: {data.mood}</p>
+          <p>  동행: {data.withCompanion ? "동행" : "혼자"}</p>
         </div>
 
-        <p className="text-center text-sm text-gray-400">이 링크는 친구가 공유한 여행 계획이에요 ✨</p>
+        <p className="text-center text-sm text-gray-400">이 링크는 친구가 공유한 여행 계획이에요</p>
       </div>
     </div>
   );

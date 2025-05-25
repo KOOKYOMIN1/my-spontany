@@ -21,7 +21,7 @@ function FlightSearch({ originCity, destinationCity }) {
       const data = await res.json();
       setFlights(data.data || []);
     } catch (err) {
-      console.error("❌ Kiwi API 호출 실패:", err);
+      console.error("Kiwi API 호출 실패:", err);
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,7 @@ function FlightSearch({ originCity, destinationCity }) {
         onClick={searchFlights}
         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-4"
       >
-        ✈️ 항공권 검색하기
+         항공권 검색하기
       </button>
 
       {loading && <p className="text-gray-500">불러오는 중...</p>}

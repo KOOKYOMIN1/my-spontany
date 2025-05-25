@@ -25,7 +25,7 @@ function History() {
 
       setEntries(data);
     } catch (error) {
-      console.error('❌ 여행 기록 불러오기 실패:', error.message || error);
+      console.error('여행 기록 불러오기 실패:', error.message || error);
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ function History() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">📂 나의 여행 히스토리</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">   나의 여행 히스토리</h1>
 
       {loading ? (
         <p>불러오는 중...</p>
@@ -63,7 +63,7 @@ function History() {
           {entries.map((entry) => (
             <div key={entry.id} className="bg-white shadow-md rounded-xl p-4 text-left relative">
               <p className="text-sm text-gray-500">
-                🕒 {new Date(entry.timestamp).toLocaleString()}
+                   {new Date(entry.timestamp).toLocaleString()}
               </p>
               <p className="mt-2"><strong>감정:</strong> {entry.mood}</p>
               <p><strong>출발지:</strong> {entry.departure}</p>

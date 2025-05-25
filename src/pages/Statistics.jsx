@@ -24,10 +24,10 @@ function Statistics() {
           }
         });
 
-        console.log("🔥 moodCounts:", moodFrequency);
+        console.log("moodCounts:", moodFrequency);
         setMoodCounts(moodFrequency);
       } catch (error) {
-        console.error('❌ 감정 통계 불러오기 실패:', error.message || error);
+        console.error('감정 통계 불러오기 실패:', error.message || error);
       } finally {
         setLoading(false);
       }
@@ -38,11 +38,11 @@ function Statistics() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">📊 나의 감정별 여행 통계</h1>
+      <h1 className="text-2xl font-bold mb-4"> 나의 감정별 여행 통계</h1>
       {!loading && Object.keys(moodCounts).length > 0 ? (
         <MoodChart data={moodCounts} />
       ) : (
-        !loading && <p className="text-gray-500">❗ 아직 저장된 감정 데이터가 없습니다.</p>
+        !loading && <p className="text-gray-500"> 아직 저장된 감정 데이터가 없습니다.</p>
       )}
     </div>
   );

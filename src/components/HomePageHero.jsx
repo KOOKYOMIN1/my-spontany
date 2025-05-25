@@ -30,9 +30,9 @@ export default function HomePageHero() {
       }}
     >
       <div className="bg-white/80 backdrop-blur-md p-10 rounded-3xl shadow-2xl text-center max-w-2xl w-full space-y-6">
-        <h1 className="text-5xl font-extrabold text-gray-800">Spontany ✈️</h1>
+        <h1 className="text-5xl font-extrabold text-gray-800">Spontany</h1>
         <p className="text-lg text-gray-600 italic">
-          여행이 필요한 순간, 감정이 안내하는 방향으로 떠나요 🌿
+          여행이 필요한 순간, 감정이 안내하는 방향으로 떠나요 
         </p>
 
         {user ? (
@@ -40,14 +40,14 @@ export default function HomePageHero() {
             onClick={() => navigate("/plan")}
             className="mt-4 bg-gradient-to-r from-pink-400 to-yellow-400 hover:from-pink-500 hover:to-yellow-500 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition"
           >
-            ✨ 지금 여행 계획하러 가기
+             지금 여행 계획하러 가기
           </button>
         ) : (
           <button
             onClick={handleLogin}
             className="mt-4 bg-white text-gray-800 border border-gray-400 hover:bg-gray-100 font-medium py-2 px-6 rounded-full shadow"
           >
-            💙 Google로 로그인하고 여행 시작하기
+             Google로 로그인하고 여행 시작하기
           </button>
         )}
 

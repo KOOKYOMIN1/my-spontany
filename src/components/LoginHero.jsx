@@ -20,13 +20,13 @@ function LoginHero() {
       <div className="bg-white/80 backdrop-blur-md p-10 rounded-3xl shadow-2xl text-center max-w-xl w-full space-y-6">
         <h1 className="text-5xl font-extrabold text-gray-800">Spontany ✈️</h1>
         <p className="text-lg text-gray-600 italic">
-          여행이 필요한 순간, 감정이 안내하는 방향으로 떠나요 🌿
+          여행이 필요한 순간, 감정이 안내하는 방향으로 떠나요 
         </p>
         <button
           onClick={handleLogin}
           className="mt-4 bg-gradient-to-r from-sky-400 to-indigo-500 hover:from-sky-500 hover:to-indigo-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition"
         >
-          💙 Google로 로그인하고 여행 시작하기
+           Google로 로그인하고 여행 시작하기
         </button>
         <p className="text-sm text-gray-500">로그인하면 당신의 감정 기반 여행 히스토리를 저장해드려요.</p>
       </div>

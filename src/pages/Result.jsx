@@ -12,8 +12,8 @@ function Result() {
   const mood = params.get("mood") || "기분전환";
   const withCompanion = params.get("withCompanion") === "true";
 
-  const [aiMessage, setAiMessage] = useState("⏳ 감성 문장을 생성 중입니다...");
-  const [schedule, setSchedule] = useState("⏳ 여행 일정을 불러오는 중입니다...");
+  const [aiMessage, setAiMessage] = useState("감성 문장을 생성 중입니다...");
+  const [schedule, setSchedule] = useState("여행 일정을 불러오는 중입니다...");
   const [imageList, setImageList] = useState([]);
   const [imageIndex, setImageIndex] = useState(0);
   const lastRequestTimeRef = useRef(0);
@@ -79,7 +79,7 @@ function Result() {
       </div>
 
       <div className="text-center text-xl font-semibold text-green-700">
-        🎯 추천 도시: {selected.city}
+          추천 도시: {selected.city}
       </div>
       <p className="text-center italic text-gray-500">{selected.message}</p>
 
