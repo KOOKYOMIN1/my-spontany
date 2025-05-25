@@ -8,23 +8,17 @@ function Header({ user }) {
   };
 
   return (
-    <header className="relative">
-      <Link
-        to="/"
-        className="text-2xl font-bold text-purple-700 p-4 inline-block"
-      >
-        Spontany
-      </Link>
-
-      <div className="absolute top-4 right-4 text-sm">
+    <header>
+      {/* 오른쪽 상단에 고정된 로그인/로그아웃 버튼 */}
+      <div className="fixed top-4 right-4 z-50">
         {user ? (
-          <div>
-            <span className="mr-2 font-medium text-gray-700">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-700">
               {user.displayName || user.email}
             </span>
             <button
               onClick={handleLogout}
-              className="text-gray-600 underline hover:text-black"
+              className="text-sm text-gray-600 underline hover:text-black"
             >
               로그아웃
             </button>
@@ -32,7 +26,7 @@ function Header({ user }) {
         ) : (
           <Link
             to="/login"
-            className="text-gray-600 underline hover:text-black"
+            className="text-sm text-gray-600 underline hover:text-black"
           >
             로그인
           </Link>
