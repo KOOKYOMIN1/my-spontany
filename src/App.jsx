@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header";
 import Result from "./pages/Result";
@@ -13,20 +13,13 @@ import Home from "./pages/Home";
 
 function App() {
   const [user, setUser] = useState(undefined);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser || null);
-
-      // 로그인 완료 시 자동으로 Home으로 이동
-      if (firebaseUser) {
-        navigate("/");
-      }
     });
-
     return () => unsubscribe();
-  }, [navigate]);
+  }, []);
 
   if (user === undefined) {
     return <div className="text-center p-8">로딩 중...</div>;
@@ -38,14 +31,11 @@ function App() {
 
       <div className="App text-center px-4 pb-10">
         <Routes>
-          <Route
-            path="/"
-            element={user ? <Home /> : <Navigate to="/login" replace />}
-          />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/result" element={<Result />} />
-          <Route path="/history" element={user ? <History /> : <Navigate to="/login" replace />} />
-          <Route path="/statistics" element={user ? <Statistics /> : <Navigate to="/login" replace />} />
+          <Route path="/history" element={user ? <History /> : <LoginPage />} />
+          <Route path="/statistics" element={user ? <Statistics /> : <LoginPage />} />
           <Route path="/share/:id" element={<Share />} />
         </Routes>
       </div>
