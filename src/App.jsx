@@ -26,10 +26,9 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-yellow-50 to-yellow-200">
+    <>
       <Header user={user} />
-
-      <div className="App text-center px-4 pb-10">
+      <div className="App text-center">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
@@ -39,8 +38,8 @@ function App() {
           <Route path="/share/:id" element={<Share />} />
         </Routes>
       </div>
-    </div>
+    </>
   );
 }
 
-export default App;
+export default App; // ✅ 이 줄이 반드시 필요!
