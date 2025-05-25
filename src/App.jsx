@@ -31,6 +31,7 @@ function App() {
 
       <div className="App text-center px-4 pb-10">
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/result" element={<Result />} />
           <Route path="/history" element={user ? <History /> : <LoginPage />} />
