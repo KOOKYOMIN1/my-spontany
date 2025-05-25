@@ -4,7 +4,6 @@ import { auth } from "./firebase";
 import { Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header";
-import Plan from "./pages/Plan"; // 메인 페이지로 활용
 import Result from "./pages/Result";
 import History from "./pages/History";
 import LoginPage from "./pages/LoginPage";
@@ -32,7 +31,6 @@ function App() {
 
       <div className="App text-center px-4 pb-10">
         <Routes>
-          <Route path="/" element={user ? <Plan /> : <Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/result" element={<Result />} />
           <Route path="/history" element={user ? <History /> : <LoginPage />} />
