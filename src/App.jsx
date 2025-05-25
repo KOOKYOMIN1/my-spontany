@@ -4,16 +4,16 @@ import { auth } from "./firebase";
 import { Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header";
-import Plan from "./pages/Plan";
+import Plan from "./pages/Plan"; // 메인 페이지로 활용
 import Result from "./pages/Result";
 import History from "./pages/History";
 import LoginPage from "./pages/LoginPage";
 import Statistics from "./pages/Statistics";
-import Share from "./pages/Share"; // ✅ 공유 페이지 import 추가
+import Share from "./pages/Share";
 import Home from "./pages/Home";
 
 function App() {
-  const [user, setUser] = useState(undefined); // 처음엔 undefined로 시작
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -43,4 +43,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
