@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Header from "./components/Header";
 import Result from "./pages/Result";
@@ -31,11 +31,14 @@ function App() {
 
       <div className="App text-center px-4 pb-10">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={user ? <Home /> : <Navigate to="/login" replace />}
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/result" element={<Result />} />
-          <Route path="/history" element={user ? <History /> : <LoginPage />} />
-          <Route path="/statistics" element={user ? <Statistics /> : <LoginPage />} />
+          <Route path="/history" element={user ? <History /> : <Navigate to="/login" replace />} />
+          <Route path="/statistics" element={user ? <Statistics /> : <Navigate to="/login" replace />} />
           <Route path="/share/:id" element={<Share />} />
         </Routes>
       </div>
