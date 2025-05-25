@@ -8,31 +8,52 @@ function Header({ user }) {
   };
 
   return (
-    <>
-      {/* 고정된 우측 상단 로그인/로그아웃 */}
-      <div className="fixed top-4 right-4 z-50">
-        {user ? (
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-700">
-              {user.displayName || user.email}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-600 underline hover:text-black"
-            >
-              로그아웃
-            </button>
-          </div>
-        ) : (
-          <Link
-            to="/login"
-            className="text-sm text-gray-600 underline hover:text-black"
+    <div
+      style={{
+        position: "fixed",
+        top: "16px",
+        right: "16px",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        padding: "6px 10px",
+        borderRadius: "8px",
+      }}
+    >
+      {user ? (
+        <>
+          <span style={{ fontSize: "14px", color: "#333" }}>
+            {user.displayName || user.email}
+          </span>
+          <button
+            onClick={handleLogout}
+            style={{
+              fontSize: "14px",
+              color: "#555",
+              background: "none",
+              border: "none",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
           >
-            로그인
-          </Link>
-        )}
-      </div>
-    </>
+            로그아웃
+          </button>
+        </>
+      ) : (
+        <Link
+          to="/login"
+          style={{
+            fontSize: "14px",
+            color: "#555",
+            textDecoration: "underline",
+          }}
+        >
+          로그인
+        </Link>
+      )}
+    </div>
   );
 }
 
