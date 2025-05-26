@@ -3,13 +3,6 @@ import { useLocation } from "react-router-dom";
 import { Leaf, Moon, Sparkles } from "lucide-react";
 import FlightSearch from "../components/FlightSearch";
 
-// ✨ mock 함수 임포트
-import { generateThemeMock } from "../api/generate-theme";
-import { generateItineraryMock } from "../api/generate-itinerary";
-
-// ✨ 자동 전환 조건
-const useMock = import.meta.env.DEV;
-
 function Result() {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
@@ -21,7 +14,6 @@ function Result() {
   const [aiMessage, setAiMessage] = useState("감성 문장을 생성 중입니다...");
   const [schedule, setSchedule] = useState("여행 일정을 불러오는 중입니다...");
   const [imageList, setImageList] = useState([]);
-  const [imageIndex, setImageIndex] = useState(0);
   const lastRequestTimeRef = useRef(0);
 
   const emotionToIcon = {
@@ -41,7 +33,7 @@ function Result() {
     message: "오사카에서 맛있는 음식과 힐링을 동시에 즐겨보세요",
   };
 
-  // 🖼 여행지 이미지 불러오기
+  // 🖼 여행지 이미지 4장 불러오기
   useEffect(() => {
     fetch(`https://api.pexels.com/v1/search?query=${selected.city}&per_page=5`, {
       headers: { Authorization: import.meta.env.VITE_PEXELS_API_KEY },
@@ -57,7 +49,7 @@ function Result() {
       );
   }, [selected.city]);
 
-  // ✨ 감성 문장 자동 전환
+  // ✨ 감성 문장 GPT 호출
   useEffect(() => {
     const now = Date.now();
     if (now - lastRequestTimeRef.current < 10000) return;
@@ -65,38 +57,26 @@ function Result() {
 
     const prompt = `${mood}, ${departure}, ${budget} 예산의 감성 여행 문장`;
 
-    if (useMock) {
-      generateThemeMock(prompt)
-        .then((data) => setAiMessage(data.message))
-        .catch(() => setAiMessage("AI 감성 문장을 불러오는 데 실패했어요."));
-    } else {
-      fetch("/api/generate-theme", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      })
-        .then((res) => res.json())
-        .then((data) => setAiMessage(data.message || "여행 테마를 불러오지 못했습니다."))
-        .catch(() => setAiMessage("AI 감성 문장을 불러오는 데 실패했어요."));
-    }
+    fetch("/api/generate-theme", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    })
+      .then((res) => res.json())
+      .then((data) => setAiMessage(data.message || "여행 테마를 불러오지 못했습니다."))
+      .catch(() => setAiMessage("AI 감성 문장을 불러오는 데 실패했어요."));
   }, [mood, departure, budget]);
 
-  // ✨ 여행 일정 자동 전환
+  // ✨ 여행 일정 GPT 호출
   useEffect(() => {
-    if (useMock) {
-      generateItineraryMock(selected.city)
-        .then((data) => setSchedule(data.text))
-        .catch(() => setSchedule("GPT로 여행 일정을 불러오는 데 실패했어요."));
-    } else {
-      fetch("/api/generate-itinerary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mood, destination: selected.city, days: 3 }),
-      })
-        .then((res) => res.json())
-        .then((data) => setSchedule(data.text || "일정을 불러오지 못했습니다."))
-        .catch(() => setSchedule("GPT로 여행 일정을 불러오는 데 실패했어요."));
-    }
+    fetch("/api/generate-itinerary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mood, destination: selected.city, days: 3 }),
+    })
+      .then((res) => res.json())
+      .then((data) => setSchedule(data.text || "일정을 불러오지 못했습니다."))
+      .catch(() => setSchedule("GPT로 여행 일정을 불러오는 데 실패했어요."));
   }, [mood, selected.city]);
 
   return (
@@ -113,18 +93,18 @@ function Result() {
       </div>
       <p className="text-center italic text-gray-500">{selected.message}</p>
 
-     {imageList.length > 0 && (
-  <div className="grid grid-cols-2 gap-4">
-    {imageList.slice(0, 4).map((src, index) => (
-      <img
-        key={index}
-        src={src}
-        alt={`여행지 이미지 ${index + 1}`}
-        className="w-full h-48 object-cover rounded-xl shadow"
-      />
-    ))}
-  </div>
-)}
+      {imageList.length > 0 && (
+        <div className="grid grid-cols-2 gap-4">
+          {imageList.slice(0, 4).map((src, index) => (
+            <img
+              key={index}
+              src={src}
+              alt={`여행지 이미지 ${index + 1}`}
+              className="w-full h-48 object-cover rounded-xl shadow"
+            />
+          ))}
+        </div>
+      )}
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center shadow">
         <p className="text-lg font-serif italic">“{aiMessage}”</p>
