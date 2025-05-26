@@ -4,16 +4,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { prompt } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    // ✅ body 파싱 (Vercel 서버에서 종종 string으로 전달됨)
+    const { prompt } =
+      typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+
     if (!prompt) {
       return res.status(400).json({ error: "No prompt provided" });
     }
 
+    // ✨ OpenAI 요청
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // ✅ OPENAI_API_KEY 주의: VITE_ 접두사 없이 서버에서만 사용
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // 서버 전용 환경변수
       },
       body: JSON.stringify({
         model: "gpt-4o",
@@ -31,9 +35,13 @@ export default async function handler(req, res) {
     }
 
     const message = data.choices[0].message.content.trim();
+
     return res.status(200).json({ message });
   } catch (error) {
     console.error("❌ 프록시 서버 오류:", error);
-    return res.status(500).json({ error: "OpenAI 프록시 호출 실패", details: error.message });
+    return res.status(500).json({
+      error: "OpenAI 프록시 호출 실패",
+      details: error.message,
+    });
   }
 }

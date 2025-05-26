@@ -8,6 +8,7 @@ function Home() {
   const [budget, setBudget] = useState("");
   const [mood, setMood] = useState("");
   const [isWithCompanion, setIsWithCompanion] = useState(false);
+  const [travelType, setTravelType] = useState("국내"); // ✨ 국내 / 해외 선택
 
   const navigate = useNavigate();
   const emotions = ["기분전환", "힐링", "설렘"];
@@ -28,6 +29,7 @@ function Home() {
       budget,
       mood,
       withCompanion: isWithCompanion,
+      travelType,
       timestamp: new Date(),
     };
 
@@ -42,7 +44,6 @@ function Home() {
         backgroundImage: "url('/img/background.jpg')",
       }}
     >
-      {/* ✅ 내부 카드 배경을 완전히 흰색으로 지정 */}
       <div className="w-[1200px] bg-white rounded-[2rem] shadow-xl p-10 border border-gray-300">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
           나만의 감성 여행 만들기
@@ -73,7 +74,7 @@ function Home() {
               onClick={() => setMood(label)}
               className={`px-4 py-[10px] rounded-full text-sm font-medium transition-all duration-200 shadow-sm ${
                 mood === label
-                  ? "bg-yellow-400 text-white scale-105"
+                  ? "bg-yellow-600 text-white scale-105"
                   : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
               }`}
             >
@@ -86,7 +87,7 @@ function Home() {
             onClick={() => setIsWithCompanion(false)}
             className={`px-4 py-[10px] rounded-full text-sm font-medium transition-all duration-200 shadow-sm ${
               !isWithCompanion
-                ? "bg-yellow-400 text-white scale-105"
+                ? "bg-yellow-600 text-white scale-105"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -98,7 +99,7 @@ function Home() {
             onClick={() => setIsWithCompanion(true)}
             className={`px-4 py-[10px] rounded-full text-sm font-medium transition-all duration-200 shadow-sm ${
               isWithCompanion
-                ? "bg-yellow-400 text-white scale-105"
+                ? "bg-yellow-600 text-white scale-105"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -106,12 +107,30 @@ function Home() {
           </button>
         </div>
 
-        <div className="flex justify-center mt-4">
+        {/* ✨ 국내 / 해외 선택 영역 */}
+        <div className="flex justify-center gap-2 mt-4">
+          {["국내", "해외"].map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setTravelType(type)}
+              className={`px-4 py-[10px] rounded-full text-sm font-medium transition-all duration-200 shadow-sm ${
+                travelType === type
+                  ? "bg-yellow-600 text-white scale-105"
+                  : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex justify-center mt-6">
           <button
             onClick={handleSubmit}
-            className="w-60 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-semibold py-[10px] rounded-full transition duration-200 shadow-md"
+            className="w-60 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold py-[10px] rounded-full transition duration-200 shadow-md"
           >
-            ✨ AI 추천 검색
+            AI 추천 검색
           </button>
         </div>
       </div>
