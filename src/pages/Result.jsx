@@ -113,13 +113,18 @@ function Result() {
       </div>
       <p className="text-center italic text-gray-500">{selected.message}</p>
 
-      {imageList.length > 0 && (
-        <img
-          src={imageList[imageIndex]}
-          alt="여행지"
-          className="w-full h-48 object-cover rounded-xl shadow"
-        />
-      )}
+     {imageList.length > 0 && (
+  <div className="grid grid-cols-2 gap-4">
+    {imageList.slice(0, 4).map((src, index) => (
+      <img
+        key={index}
+        src={src}
+        alt={`여행지 이미지 ${index + 1}`}
+        className="w-full h-48 object-cover rounded-xl shadow"
+      />
+    ))}
+  </div>
+)}
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center shadow">
         <p className="text-lg font-serif italic">“{aiMessage}”</p>

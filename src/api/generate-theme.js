@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ✅ body 파싱 (Vercel 서버에서 종종 string으로 전달됨)
+    // ✅ body 파싱 (Vercel에서는 req.body가 string일 수 있음)
     const { prompt } =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
@@ -12,12 +12,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "No prompt provided" });
     }
 
-    // ✨ OpenAI 요청
+    // ✅ OpenAI 요청
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // 서버 전용 환경변수
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // 서버 환경변수 (VITE_ 없이)
       },
       body: JSON.stringify({
         model: "gpt-4o",
@@ -35,7 +35,6 @@ export default async function handler(req, res) {
     }
 
     const message = data.choices[0].message.content.trim();
-
     return res.status(200).json({ message });
   } catch (error) {
     console.error("❌ 프록시 서버 오류:", error);
