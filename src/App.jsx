@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { Routes, Route } from "react-router-dom";
+import "react-datepicker/dist/react-datepicker.css";
 
 import Header from "./components/Header";
 import Result from "./pages/Result";
