@@ -5,8 +5,7 @@ import { saveUserPlan } from "../utils/saveUserPlan";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
-
-import "../index.css"; // ✅ Tailwind가 제대로 로드되지 않을 경우 추가 확인용
+import "../index.css"; // Ensure Tailwind is imported
 
 function Home() {
   const [departure, setDeparture] = useState("");
@@ -46,17 +45,24 @@ function Home() {
   };
 
   const moodColors = {
-    기분전환: "bg-pink-500 hover:bg-pink-600",
-    힐링: "bg-green-500 hover:bg-green-600",
-    설렘: "bg-indigo-500 hover:bg-indigo-600",
+    기분전환: mood === "기분전환" ? "bg-pink-600 scale-105" : "bg-pink-400 hover:bg-pink-500",
+    힐링: mood === "힐링" ? "bg-green-600 scale-105" : "bg-green-400 hover:bg-green-500",
+    설렘: mood === "설렘" ? "bg-indigo-600 scale-105" : "bg-indigo-400 hover:bg-indigo-500",
   };
+
+  const moodBackgrounds = {
+    기분전환: "url('https://images.unsplash.com/photo-1747372236557-6a201063ab35?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+    힐링: "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
+    설렘: "url('https://images.unsplash.com/reserve/Af0sF2OS5S5gatqrKzVP_Silhoutte.jpg?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+    기본: `url("https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80")`,
+};
+
+  const selectedBackground = moodBackgrounds[mood] || moodBackgrounds["기본"];
 
   return (
     <div
       className="min-h-screen bg-cover bg-center flex justify-center items-start py-16 px-4"
-      style={{
-        backgroundImage: "url('/img/background.jpg')",
-      }}
+      style={{ backgroundImage: selectedBackground }}
     >
       <div className="w-[1200px] bg-white rounded-[2rem] shadow-xl p-10 border border-gray-200 animate-fade-in">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
@@ -82,8 +88,8 @@ function Home() {
                     travelType === type
                       ? "bg-yellow-600 text-white scale-105"
                       : idx === 0
-                      ? "bg-orange-400 text-white hover:bg-orange-500"
-                      : "bg-sky-400 text-white hover:bg-sky-500"
+                      ? "bg-orange-500 text-white hover:bg-orange-600"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
                   }`}
                 >
                   {type}
@@ -135,11 +141,8 @@ function Home() {
           {["기분전환", "힐링", "설렘"].map((label) => (
             <button
               key={label}
-              type="button"
               onClick={() => setMood(label)}
-              className={`w-32 px-3 py-[8px] rounded-full text-sm font-medium text-white transition-all duration-200 shadow-md ${
-                mood === label ? "scale-105" : ""
-              } ${moodColors[label]}`}
+              className={`w-32 px-3 py-[8px] rounded-full text-sm font-medium text-white transition-all duration-200 shadow-md ${moodColors[label]}`}
             >
               {label}
             </button>
