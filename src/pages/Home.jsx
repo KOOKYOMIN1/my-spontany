@@ -1,103 +1,70 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
-import { saveUserPlan } from "../utils/saveUserPlan";
+// 통합형 Home.jsx + Chat 기능 추가 + 하단 고정 버튼으로 채팅창 토글
+import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
-import "../index.css"; // Ensure Tailwind is imported
+import TourList from "../components/TourList";
+import ChatBox from "../components/ChatBox";
+import { auth } from "../firebase";
+import { saveUserPlan } from "../utils/saveUserPlan";
+import { db } from "../firebase";
+import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import "../index.css";
 
 function Home() {
   const [departure, setDeparture] = useState("");
   const [budget, setBudget] = useState("");
-  const [mood, setMood] = useState("");
   const [isWithCompanion, setIsWithCompanion] = useState(false);
+  const [randomMatch, setRandomMatch] = useState(false);
   const [travelType, setTravelType] = useState("국내");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [matchUser, setMatchUser] = useState({ uid: "test-user" });
+  const [showResult, setShowResult] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const today = new Date();
 
-  const navigate = useNavigate();
-
-  const handleSubmit = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      alert("로그인 후 이용해주세요");
-      return;
-    }
-    if (!departure || !budget || !mood || !startDate || !endDate) {
-      alert("모든 값을 입력해주세요");
-      return;
-    }
-
-    const planData = {
-      departure,
-      budget,
-      mood,
-      withCompanion: isWithCompanion,
-      travelType,
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
-      timestamp: new Date(),
-    };
-
-    const newPlanId = await saveUserPlan(user.uid, planData);
-    navigate(`/result?id=${newPlanId}`);
-  };
-
-  const moodColors = {
-    기분전환: mood === "기분전환" ? "bg-pink-600 scale-105" : "bg-pink-400 hover:bg-pink-500",
-    힐링: mood === "힐링" ? "bg-green-600 scale-105" : "bg-green-400 hover:bg-green-500",
-    설렘: mood === "설렘" ? "bg-indigo-600 scale-105" : "bg-indigo-400 hover:bg-indigo-500",
-  };
-
-  const moodBackgrounds = {
-    기분전환: "url('https://images.unsplash.com/photo-1747372236557-6a201063ab35?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-    힐링: "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
-    설렘: "url('https://images.unsplash.com/reserve/Af0sF2OS5S5gatqrKzVP_Silhoutte.jpg?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-    기본: `url("https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80")`,
-};
-
-  const selectedBackground = moodBackgrounds[mood] || moodBackgrounds["기본"];
+  const backgroundImage = "url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80')";
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center flex justify-center items-start py-16 px-4"
-      style={{ backgroundImage: selectedBackground }}
+      className="min-h-screen bg-cover bg-center flex flex-col items-center py-16 px-4 relative"
+      style={{ backgroundImage }}
     >
-      <div className="w-[1200px] bg-white rounded-[2rem] shadow-xl p-10 border border-gray-200 animate-fade-in">
+      <div className="w-[1200px] bg-white bg-opacity-90 backdrop-blur-lg rounded-[2rem] shadow-xl p-10 border border-gray-200 animate-fade-in">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          나만의 감성 여행 만들기
+          랜덤 동행 감성 여행 만들기
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="flex flex-col gap-2">
-            <input
-              type="text"
-              placeholder="출발지를 입력하세요"
-              value={departure}
-              onChange={(e) => setDeparture(e.target.value)}
-              className="w-full px-4 py-[10px] text-sm border border-gray-200 bg-gray-50 rounded-full focus:ring-2 focus:ring-yellow-300 focus:outline-none"
-            />
-            <div className="flex gap-2">
-              {["국내", "해외"].map((type, idx) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setTravelType(type)}
-                  className={`flex-1 px-3 py-[8px] rounded-full text-sm font-medium transition-all duration-200 shadow-md ${
-                    travelType === type
-                      ? "bg-yellow-600 text-white scale-105"
-                      : idx === 0
-                      ? "bg-orange-500 text-white hover:bg-orange-600"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* 여행 유형 */}
+        <div className="flex justify-center gap-4 mb-8">
+          {["국내", "해외"].map((type, idx) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setTravelType(type)}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-md ${
+                travelType === type
+                  ? "bg-yellow-600 text-white scale-105"
+                  : idx === 0
+                  ? "bg-orange-500 text-white hover:bg-orange-600"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
 
+        {/* 출발지 + 예산 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <input
+            type="text"
+            placeholder="출발지를 입력하세요"
+            value={departure}
+            onChange={(e) => setDeparture(e.target.value)}
+            className="w-full px-4 py-[10px] text-sm border border-gray-200 bg-gray-50 rounded-full focus:ring-2 focus:ring-yellow-300 focus:outline-none"
+          />
           <input
             type="number"
             placeholder="예산 (₩)"
@@ -105,7 +72,10 @@ function Home() {
             onChange={(e) => setBudget(e.target.value)}
             className="w-full px-4 py-[10px] text-sm border border-gray-200 bg-gray-50 rounded-full focus:ring-2 focus:ring-yellow-300 focus:outline-none"
           />
+        </div>
 
+        {/* 날짜 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <DatePicker
             selected={startDate}
             onChange={(date) => {
@@ -117,6 +87,7 @@ function Home() {
             selectsStart
             startDate={startDate}
             endDate={endDate}
+            minDate={today}
             locale={ko}
             dateFormat="yyyy년 MM월 dd일"
             placeholderText="출발 날짜 선택"
@@ -129,57 +100,88 @@ function Home() {
             selectsEnd
             startDate={startDate}
             endDate={endDate}
-            minDate={startDate}
+            minDate={startDate || today}
             locale={ko}
             dateFormat="yyyy년 MM월 dd일"
             placeholderText="돌아오는 날짜 선택"
+            fixedHeight
             className="w-full px-4 py-[10px] text-sm border border-gray-200 bg-gray-50 rounded-full text-center focus:ring-2 focus:ring-yellow-300 focus:outline-none"
           />
         </div>
 
+        {/* 동행 버튼들 */}
         <div className="flex flex-wrap justify-center gap-4 mb-6">
-          {["기분전환", "힐링", "설렘"].map((label) => (
-            <button
-              key={label}
-              onClick={() => setMood(label)}
-              className={`w-32 px-3 py-[8px] rounded-full text-sm font-medium text-white transition-all duration-200 shadow-md ${moodColors[label]}`}
-            >
-              {label}
-            </button>
-          ))}
           <button
             type="button"
-            onClick={() => setIsWithCompanion(false)}
-            className={`w-32 px-3 py-[8px] rounded-full text-sm font-medium transition-all duration-200 shadow-md ${
-              !isWithCompanion
-                ? "bg-teal-600 text-white scale-105"
-                : "bg-teal-100 text-teal-800 hover:bg-teal-200"
+            onClick={() => {
+              setIsWithCompanion(false);
+              setRandomMatch(false);
+            }}
+            className={`px-5 py-[6px] text-sm font-medium rounded-full shadow-md transition-all duration-200 ${
+              !isWithCompanion && !randomMatch ? "bg-gray-600 text-white scale-105" : "bg-gray-100 text-gray-800 hover:bg-gray-200"
             }`}
           >
             혼자 여행
           </button>
           <button
             type="button"
-            onClick={() => setIsWithCompanion(true)}
-            className={`w-32 px-3 py-[8px] rounded-full text-sm font-medium transition-all duration-200 shadow-md ${
-              isWithCompanion
-                ? "bg-rose-500 text-white scale-105"
-                : "bg-rose-100 text-rose-800 hover:bg-rose-200"
+            onClick={() => {
+              setIsWithCompanion(true);
+              setRandomMatch(false);
+            }}
+            className={`px-5 py-[6px] text-sm font-medium rounded-full shadow-md transition-all duration-200 ${
+              isWithCompanion && !randomMatch ? "bg-teal-600 text-white scale-105" : "bg-teal-100 text-teal-800 hover:bg-teal-200"
             }`}
           >
             동행 있음
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsWithCompanion(true);
+              setRandomMatch(true);
+            }}
+            className={`px-5 py-[6px] text-sm font-medium rounded-full shadow-md transition-all duration-200 ${
+              randomMatch ? "bg-rose-600 text-white scale-105" : "bg-rose-100 text-rose-800 hover:bg-rose-200"
+            }`}
+          >
+            랜덤 동행
           </button>
         </div>
 
         <div className="flex justify-center">
           <button
-            onClick={handleSubmit}
+            onClick={() => setShowResult(true)}
             className="w-60 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold py-[10px] rounded-full transition duration-300 shadow-lg hover:scale-105"
           >
-            AI 추천 검색
+            여행 계획하기
           </button>
         </div>
       </div>
+
+      {showResult && (
+        <div className="w-[1200px] mt-12 mb-20">
+          <div className="text-center text-white text-base mb-6">
+            여행지 추천 결과입니다.
+          </div>
+          <TourList areaCode={1} />
+        </div>
+      )}
+
+      {/* 💬 채팅 버튼 항상 표시 */}
+      <button
+        onClick={() => setShowChat(!showChat)}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-600 text-white text-xl shadow-lg flex items-center justify-center hover:bg-blue-700 z-50"
+      >
+        💬
+      </button>
+
+      {showChat && (
+        <div className="fixed bottom-24 right-6 w-80 h-96 bg-white rounded-xl shadow-xl p-4 z-40">
+          <h2 className="text-lg font-semibold mb-2">실시간 채팅</h2>
+          <ChatBox matchId={`match-${auth.currentUser?.uid || "local"}-${matchUser.uid}`} />
+        </div>
+      )}
     </div>
   );
 }
