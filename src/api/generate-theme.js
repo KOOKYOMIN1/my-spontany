@@ -4,25 +4,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ✅ body 파싱 (Vercel에서는 req.body가 string일 수 있음)
+    // ✅ Vercel에서는 req.body가 문자열일 수 있음
     const { prompt } =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    if (!prompt) {
-      return res.status(400).json({ error: "No prompt provided" });
+    // ✅ prompt가 없거나 공백일 경우 예외 처리
+    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+      return res.status(400).json({ error: "No valid prompt provided" });
     }
 
-    // ✅ OpenAI 요청
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // 서버 환경변수 (VITE_ 없이)
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // 반드시 서버 환경변수에서 설정 (VITE_ 없이)
       },
       body: JSON.stringify({
         model: "gpt-4o",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 60,
+        max_tokens: 100, // ✨ 약간 넉넉하게
         temperature: 0.8,
       }),
     });
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     const message = data.choices[0].message.content.trim();
     return res.status(200).json({ message });
   } catch (error) {
-    console.error("❌ 프록시 서버 오류:", error);
+    console.error("❌ GPT 프록시 호출 실패:", error);
     return res.status(500).json({
       error: "OpenAI 프록시 호출 실패",
       details: error.message,
