@@ -1,9 +1,8 @@
-// 통합형 Home.jsx + Chat 기능 추가 + 하단 고정 버튼으로 채팅창 토글
+// 통합형 Home.jsx + Chat + TourAPI 표출 기능 추가
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
-import TourList from "../components/TourList";
 import ChatBox from "../components/ChatBox";
 import { auth } from "../firebase";
 import { saveUserPlan } from "../utils/saveUserPlan";
@@ -22,9 +21,22 @@ function Home() {
   const [matchUser, setMatchUser] = useState({ uid: "test-user" });
   const [showResult, setShowResult] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [tourData, setTourData] = useState([]);
   const today = new Date();
 
   const backgroundImage = "url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80')";
+
+  useEffect(() => {
+    if (showResult) {
+      fetch(`https://apis.data.go.kr/B551011/KorService1/areaBasedList1?serviceKey=${import.meta.env.VITE_TOURAPI_KEY}&numOfRows=6&pageNo=1&MobileOS=ETC&MobileApp=Spontany&_type=json&areaCode=1`)
+        .then(res => res.json())
+        .then(json => {
+          const items = json.response.body.items?.item || [];
+          setTourData(items);
+        })
+        .catch(err => console.error("TourAPI Error:", err));
+    }
+  }, [showResult]);
 
   return (
     <div
@@ -162,9 +174,21 @@ function Home() {
       {showResult && (
         <div className="w-[1200px] mt-12 mb-20">
           <div className="text-center text-white text-base mb-6">
-            여행지 추천 결과입니다.
+            한국관광공사 TourAPI로 가져온 서울 지역 관광지입니다.
           </div>
-          <TourList areaCode={1} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tourData.map((item) => (
+              <div key={item.contentid} className="bg-white bg-opacity-90 p-4 rounded-xl shadow-md">
+                <h3 className="text-lg font-bold mb-2 text-gray-800">{item.title}</h3>
+                <img
+                  src={item.firstimage || "https://via.placeholder.com/400x200?text=No+Image"}
+                  alt={item.title}
+                  className="w-full h-40 object-cover rounded-lg mb-2"
+                />
+                <p className="text-sm text-gray-600">{item.addr1}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
