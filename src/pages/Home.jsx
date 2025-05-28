@@ -38,14 +38,14 @@ function Home() {
     setBudget(formatBudget(input));
   };
 
-  const generateItinerary = () => {
-    if (!departure || !startDate || !endDate) return;
-    setIsLoading(true);
-    setItinerary("");
-    const days = Math.max(1, Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1);
-    const parsedBudget = parseInt(budget.replace(/[^0-9]/g, "")) || 0;
+  const generateItinerary = async () => {
+  if (!departure || !startDate || !endDate) return;
+  setIsLoading(true);
+  setItinerary("");
+  const days = Math.max(1, Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1);
+  const parsedBudget = parseInt(budget.replace(/[^0-9]/g, "")) || 0;
 
-    const prompt = `당신은 감성적인 여행 플래너입니다.
+  const prompt = `당신은 감성적인 여행 플래너입니다.
 사용자는 "${origin}"에서 출발하여 "${departure}"로 여행을 갑니다.
 "기분전환" 감정을 주제로 ${days}일간의 여행 일정을 하루 단위로 구성해 주세요.
 사용자의 여행 예산은 총 ${parsedBudget.toLocaleString()}원입니다.
@@ -54,33 +54,25 @@ function Home() {
 각 일정은 하루에 3~4개의 활동으로 구성하고, 각 활동에는 짧고 감성적인 설명을 덧붙여 주세요.
 친절하고 감성적인 어조를 유지해 주세요.`;
 
-    fetch("https://api.openai.com/v1/chat/completions", {
+  try {
+    const res = await fetch("/api/generate-theme", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 1200,
-        temperature: 0.85,
-      }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        const text = data.choices?.[0]?.message?.content?.trim();
-        setItinerary(text || "일정 생성 실패");
-      })
-      .catch(err => {
-        console.error("GPT Error:", err);
-        setItinerary("일정 생성 중 오류 발생");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+      body: JSON.stringify({ prompt }),
+    });
 
+    const data = await res.json();
+    const text = data.message?.trim();
+    setItinerary(text || "일정 생성 실패");
+  } catch (err) {
+    console.error("GPT Proxy Error:", err);
+    setItinerary("일정 생성 중 오류 발생");
+  } finally {
+    setIsLoading(false);
+  }
+};
   const handleGeneratePlan = () => {
     setIsLoading(true);
     setShowResult(true);

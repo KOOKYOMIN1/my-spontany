@@ -1,33 +1,34 @@
+// 위치: /api/generate-theme.js (Vercel root 기준)
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    // ✅ Vercel에서는 req.body가 문자열일 수 있음
-    const { prompt } =
-      typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    // 로그로 확인
+    console.log("🔑 OPENAI_API_KEY:", process.env.OPENAI_API_KEY);
 
-    // ✅ prompt가 없거나 공백일 경우 예외 처리
+    const { prompt } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+
     if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-      return res.status(400).json({ error: "No valid prompt provided" });
+      return res.status(400).json({ error: "Invalid prompt" });
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // 반드시 서버 환경변수에서 설정 (VITE_ 없이)
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 100, // ✨ 약간 넉넉하게
         temperature: 0.8,
+        max_tokens: 1000,
       }),
     });
 
-    const data = await response.json();
+    const data = await openaiRes.json();
 
     if (!data.choices || !data.choices[0]?.message?.content) {
       console.error("❌ GPT 응답 이상:", data);
