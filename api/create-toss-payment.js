@@ -1,4 +1,3 @@
-// /api/create-toss-payment.js
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -24,10 +23,10 @@ export default async function handler(req, res) {
         amount,
         orderName,
         orderId: `${userId}-${Date.now()}`,
-        successUrl: "https://your-spontany.vercel.app/payment-success",
-        failUrl: "https://your-spontany.vercel.app/payment-fail",
+        successUrl: "https://my-spontany.vercel.app/payment-success",
+        failUrl: "https://my-spontany.vercel.app/payment-fail",
         customerName: "Spontany 사용자",
-        paymentMethod: "카드", // 생략 시 결제창에서 선택
+        paymentMethod: "카드", // 생략 시 결제창에서 선택 가능
       }),
     });
 
