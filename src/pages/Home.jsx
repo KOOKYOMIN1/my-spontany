@@ -1,4 +1,4 @@
-// ✅ 완성형 Home.jsx (작성란 유지 + 매칭 취소 버튼 추가 + 상태 메시지 표시)
+// ✅ 완성형 Home.jsx (onAuthStateChanged로 permission 에러 해결 포함 + 전체 UI 통합)
 
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
@@ -14,7 +14,11 @@ import {
   collection,
   serverTimestamp,
   onSnapshot,
+  query,
+  where,
+  or,
 } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import "../index.css";
 
 const CITY_SUGGESTIONS = ["서울", "부산", "제주", "대구", "인천", "광주", "대전", "울산", "강릉", "속초", "여수", "전주", "경주"];
@@ -27,12 +31,8 @@ function Home() {
   const [startDate, endDate] = dateRange;
   const [mood, setMood] = useState("");
   const [style, setStyle] = useState("");
-  const [itinerary, setItinerary] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showResult, setShowResult] = useState(false);
   const [matchCount, setMatchCount] = useState(0);
   const [isPremium, setIsPremium] = useState(false);
-  const [showChat, setShowChat] = useState(false);
   const [matchUser, setMatchUser] = useState(null);
   const [isMatching, setIsMatching] = useState(false);
   const [matchingUsersCount, setMatchingUsersCount] = useState(0);
@@ -48,11 +48,25 @@ function Home() {
     const premiumStatus = localStorage.getItem("isPremium");
     if (premiumStatus === "true") setIsPremium(true);
 
-    const unsubscribe = onSnapshot(collection(db, "matchingQueue"), (snapshot) => {
-      setMatchingUsersCount(snapshot.size);
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const q = query(
+          collection(db, "matchingQueue"),
+          where("timestamp", ">", new Date(Date.now() - 1000 * 60 * 30))
+        );
+        const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+          setMatchingUsersCount(snapshot.size);
+        }, (error) => {
+          console.error("❌ snapshot 에러:", error.message);
+        });
+        return () => unsubscribeSnapshot();
+      }
     });
-    return () => unsubscribe();
+
+    return () => unsubscribeAuth();
   }, []);
+
+  
 
   const saveMatch = () => {
     const todayKey = new Date().toISOString().slice(0, 10);
@@ -72,25 +86,41 @@ function Home() {
   };
 
   const handleRandomMatch = async () => {
-    if (!auth.currentUser) return alert("로그인 후 이용해주세요");
-    if (!origin || !departure || !budget || !startDate || !endDate || !mood || !style)
+    const uid = auth.currentUser?.uid;
+    if (!uid) return alert("로그인 후 이용해주세요");
+    if (!origin || !departure || !budget || !startDate || !endDate || !mood || !style) {
       return alert("모든 항목을 작성해주세요");
+    }
 
     setIsMatching(true);
     setMatchStatusMessage(`매칭 중입니다... 현재 매칭 대기 중인 유저: ${matchingUsersCount}명`);
 
-    const uid = auth.currentUser.uid;
     const myRef = doc(db, "matchingQueue", uid);
+    const myBudget = budget.replaceAll(",", "");
+
     await setDoc(myRef, {
       userId: uid,
+      origin,
+      departure,
+      budget: myBudget,
+      mood,
+      style,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
       timestamp: serverTimestamp(),
     });
 
-    const snapshot = await getDocs(collection(db, "matchingQueue"));
+    const q = query(collection(db, "matchingQueue"), where("userId", "!=", uid));
+    const snapshot = await getDocs(q);
     const queue = [];
     snapshot.forEach(doc => queue.push(doc.data()));
 
-    const other = queue.find((u) => u.userId !== uid);
+    const other = queue.find((u) =>
+      u.mood === mood &&
+      u.departure === departure &&
+      u.style === style &&
+      u.budget.replaceAll(",", "") === myBudget
+    );
 
     if (other) {
       const otherRef = doc(db, "matchingQueue", other.userId);
@@ -220,10 +250,6 @@ function Home() {
           <ChatBox matchId={matchUser.matchId} />
         </div>
       )}
-
-      <button onClick={() => setShowChat(!showChat)} className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-600 text-white text-xl shadow-lg flex items-center justify-center hover:bg-blue-700 z-50">
-        💬
-      </button>
     </div>
   );
 }
